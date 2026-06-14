@@ -9,6 +9,7 @@ const TaskModel = {
                WHERE 1=1`;
     const values = [];
 
+    // Filtering
     if (filters.status) {
       sql += ` AND tasks.status = ?`;
       values.push(filters.status);
@@ -23,6 +24,12 @@ const TaskModel = {
       sql += ` AND tasks.assigned_to = ?`;
       values.push(filters.assigned_to);
     }
+
+    // Sorting
+    const allowedSortFields = ['due_date', 'priority', 'status', 'created_at'];
+    const sortBy = allowedSortFields.includes(filters.sortBy) ? filters.sortBy : 'created_at';
+    const sortOrder = filters.sortOrder === 'asc' ? 'ASC' : 'DESC';
+    sql += ` ORDER BY ${sortBy} ${sortOrder}`;
 
     db.query(sql, values, callback);
   },

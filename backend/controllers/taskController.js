@@ -1,12 +1,18 @@
 const TaskModel = require('../models/taskModel');
 
+// Valid values
+const VALID_PRIORITIES = ['Low', 'Medium', 'High'];
+const VALID_STATUSES = ['To Do', 'In Progress', 'Completed'];
+
 const TaskController = {
 
   getAllTasks: (req, res) => {
     const filters = {
       status: req.query.status || null,
       priority: req.query.priority || null,
-      assigned_to: req.query.assigned_to || null
+      assigned_to: req.query.assigned_to || null,
+      sortBy: req.query.sortBy || 'created_at',
+      sortOrder: req.query.sortOrder || 'desc'
     };
 
     TaskModel.getAllTasks(filters, (err, results) => {
@@ -33,11 +39,38 @@ const TaskController = {
   createTask: (req, res) => {
     const { title, description, assigned_to, project_id, due_date, priority, status, created_by } = req.body;
 
+    // Validation
     if (!title) {
       return res.status(400).json({ error: 'Title is required' });
     }
 
-    const taskData = { title, description, assigned_to, project_id, due_date, priority: priority || 'Medium', status: status || 'To Do', created_by };
+    if (priority && !VALID_PRIORITIES.includes(priority)) {
+      return res.status(400).json({ error: 'Priority must be Low, Medium, or High' });
+    }
+
+    if (status && !VALID_STATUSES.includes(status)) {
+      return res.status(400).json({ error: 'Status must be To Do, In Progress, or Completed' });
+    }
+
+    if (due_date) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const dueDate = new Date(due_date);
+      if (dueDate < today) {
+        return res.status(400).json({ error: 'Due date cannot be in the past' });
+      }
+    }
+
+    const taskData = {
+      title,
+      description,
+      assigned_to,
+      project_id,
+      due_date,
+      priority: priority || 'Medium',
+      status: status || 'To Do',
+      created_by
+    };
 
     TaskModel.createTask(taskData, (err, result) => {
       if (err) {
@@ -51,8 +84,17 @@ const TaskController = {
     const { id } = req.params;
     const { title, description, assigned_to, due_date, priority, status } = req.body;
 
+    // Validation
     if (!title) {
       return res.status(400).json({ error: 'Title is required' });
+    }
+
+    if (priority && !VALID_PRIORITIES.includes(priority)) {
+      return res.status(400).json({ error: 'Priority must be Low, Medium, or High' });
+    }
+
+    if (status && !VALID_STATUSES.includes(status)) {
+      return res.status(400).json({ error: 'Status must be To Do, In Progress, or Completed' });
     }
 
     const taskData = { title, description, assigned_to, due_date, priority, status };
