@@ -1,8 +1,15 @@
 const TaskModel = require('../models/taskModel');
 
-// Valid values
 const VALID_PRIORITIES = ['Low', 'Medium', 'High'];
 const VALID_STATUSES = ['To Do', 'In Progress', 'Completed'];
+
+const errorResponse = (res, statusCode, errorCode, message, description = null) => {
+  return res.status(statusCode).json({
+    errorCode,
+    message,
+    description
+  });
+};
 
 const TaskController = {
 
@@ -17,7 +24,7 @@ const TaskController = {
 
     TaskModel.getAllTasks(filters, (err, results) => {
       if (err) {
-        return res.status(500).json({ error: 'Failed to get tasks', message: err.message });
+        return errorResponse(res, 500, 'TASK_FETCH_ERROR', 'Failed to retrieve tasks', err.message);
       }
       res.status(200).json({ success: true, data: results });
     });
@@ -25,31 +32,35 @@ const TaskController = {
 
   getTaskById: (req, res) => {
     const { id } = req.params;
+
+    if (!id || isNaN(id)) {
+      return errorResponse(res, 400, 'INVALID_TASK_ID', 'Invalid task ID', 'Task ID must be a valid number');
+    }
+
     TaskModel.getTaskById(id, (err, results) => {
       if (err) {
-        return res.status(500).json({ error: 'Failed to get task', message: err.message });
+        return errorResponse(res, 500, 'TASK_FETCH_ERROR', 'Failed to retrieve task', err.message);
       }
       if (results.length === 0) {
-        return res.status(404).json({ error: 'Task not found' });
+        return errorResponse(res, 404, 'TASK_NOT_FOUND', 'Task not found', `No task found with ID ${id}`);
       }
       res.status(200).json({ success: true, data: results[0] });
     });
   },
 
   createTask: (req, res) => {
-    const { title, description, assigned_to, project_id, due_date, priority, status, created_by } = req.body;
+    const { title, description, project_id, due_date, priority, status, created_by } = req.body;
 
-    // Validation
     if (!title) {
-      return res.status(400).json({ error: 'Title is required' });
+      return errorResponse(res, 400, 'VALIDATION_ERROR', 'Title is required', 'Task title cannot be empty');
     }
 
     if (priority && !VALID_PRIORITIES.includes(priority)) {
-      return res.status(400).json({ error: 'Priority must be Low, Medium, or High' });
+      return errorResponse(res, 400, 'VALIDATION_ERROR', 'Invalid priority value', `Priority must be one of: ${VALID_PRIORITIES.join(', ')}`);
     }
 
     if (status && !VALID_STATUSES.includes(status)) {
-      return res.status(400).json({ error: 'Status must be To Do, In Progress, or Completed' });
+      return errorResponse(res, 400, 'VALIDATION_ERROR', 'Invalid status value', `Status must be one of: ${VALID_STATUSES.join(', ')}`);
     }
 
     if (due_date) {
@@ -57,14 +68,13 @@ const TaskController = {
       today.setHours(0, 0, 0, 0);
       const dueDate = new Date(due_date);
       if (dueDate < today) {
-        return res.status(400).json({ error: 'Due date cannot be in the past' });
+        return errorResponse(res, 400, 'VALIDATION_ERROR', 'Invalid due date', 'Due date cannot be in the past');
       }
     }
 
     const taskData = {
       title,
       description,
-      assigned_to,
       project_id,
       due_date,
       priority: priority || 'Medium',
@@ -74,7 +84,7 @@ const TaskController = {
 
     TaskModel.createTask(taskData, (err, result) => {
       if (err) {
-        return res.status(500).json({ error: 'Failed to create task', message: err.message });
+        return errorResponse(res, 500, 'TASK_CREATE_ERROR', 'Failed to create task', err.message);
       }
       res.status(201).json({ success: true, message: 'Task created successfully', taskId: result.insertId });
     });
@@ -82,29 +92,32 @@ const TaskController = {
 
   updateTask: (req, res) => {
     const { id } = req.params;
-    const { title, description, assigned_to, due_date, priority, status } = req.body;
+    const { title, description, due_date, priority, status } = req.body;
 
-    // Validation
+    if (!id || isNaN(id)) {
+      return errorResponse(res, 400, 'INVALID_TASK_ID', 'Invalid task ID', 'Task ID must be a valid number');
+    }
+
     if (!title) {
-      return res.status(400).json({ error: 'Title is required' });
+      return errorResponse(res, 400, 'VALIDATION_ERROR', 'Title is required', 'Task title cannot be empty');
     }
 
     if (priority && !VALID_PRIORITIES.includes(priority)) {
-      return res.status(400).json({ error: 'Priority must be Low, Medium, or High' });
+      return errorResponse(res, 400, 'VALIDATION_ERROR', 'Invalid priority value', `Priority must be one of: ${VALID_PRIORITIES.join(', ')}`);
     }
 
     if (status && !VALID_STATUSES.includes(status)) {
-      return res.status(400).json({ error: 'Status must be To Do, In Progress, or Completed' });
+      return errorResponse(res, 400, 'VALIDATION_ERROR', 'Invalid status value', `Status must be one of: ${VALID_STATUSES.join(', ')}`);
     }
 
-    const taskData = { title, description, assigned_to, due_date, priority, status };
+    const taskData = { title, description, due_date, priority, status };
 
     TaskModel.updateTask(id, taskData, (err, result) => {
       if (err) {
-        return res.status(500).json({ error: 'Failed to update task', message: err.message });
+        return errorResponse(res, 500, 'TASK_UPDATE_ERROR', 'Failed to update task', err.message);
       }
       if (result.affectedRows === 0) {
-        return res.status(404).json({ error: 'Task not found' });
+        return errorResponse(res, 404, 'TASK_NOT_FOUND', 'Task not found', `No task found with ID ${id}`);
       }
       res.status(200).json({ success: true, message: 'Task updated successfully' });
     });
@@ -112,12 +125,17 @@ const TaskController = {
 
   deleteTask: (req, res) => {
     const { id } = req.params;
+
+    if (!id || isNaN(id)) {
+      return errorResponse(res, 400, 'INVALID_TASK_ID', 'Invalid task ID', 'Task ID must be a valid number');
+    }
+
     TaskModel.deleteTask(id, (err, result) => {
       if (err) {
-        return res.status(500).json({ error: 'Failed to delete task', message: err.message });
+        return errorResponse(res, 500, 'TASK_DELETE_ERROR', 'Failed to delete task', err.message);
       }
       if (result.affectedRows === 0) {
-        return res.status(404).json({ error: 'Task not found' });
+        return errorResponse(res, 404, 'TASK_NOT_FOUND', 'Task not found', `No task found with ID ${id}`);
       }
       res.status(200).json({ success: true, message: 'Task deleted successfully' });
     });
