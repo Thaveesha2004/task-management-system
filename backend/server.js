@@ -8,6 +8,7 @@ const swaggerSpec = require('./config/swagger');
 const db = require('./config/db');
 const taskRoutes = require('./routes/taskRoutes');
 const commentRoutes = require('./routes/commentRoutes');
+const projectRoutes = require('./routes/projectRoutes');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 
@@ -36,11 +37,11 @@ app.use(express.json());
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Routes
-app.use('/api/tasks', taskRoutes);
-app.use('/api/comments', commentRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
-
+app.use('/api/tasks', taskRoutes);
+app.use('/api/comments', commentRoutes);
+app.use('/api/projects', projectRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'Task Management System API is running!' });
@@ -68,7 +69,7 @@ app.get('/api/health', (req, res) => {
 });
 
 io.on('connection', (socket) => {
-  console.log('A user connected:', socket.id); 
+  console.log('A user connected:', socket.id);
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
   });
