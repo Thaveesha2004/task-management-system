@@ -13,13 +13,23 @@ const userRoutes = require('./routes/userRoutes');
 
 dotenv.config();
 
+const allowedOrigins = (process.env.CLIENT_ORIGIN || 'http://localhost:5173')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: { origin: '*' }
+  cors: { origin: allowedOrigins.length ? allowedOrigins : '*' },
 });
 
-app.use(cors());
+app.use(
+  cors({
+    origin: allowedOrigins.length ? allowedOrigins : true,
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // Swagger Documentation
@@ -34,6 +44,20 @@ app.use('/api/users', userRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'Task Management System API is running!' });
+});
+
+app.get('/api/health', (req, res) => {
+  db.query('SELECT 1 AS ok', (err) => {
+    if (err) {
+      return res.status(503).json({
+        status: 'error',
+        message: 'Database connection failed',
+        detail: err.message,
+      });
+    }
+
+    res.json({ status: 'ok', message: 'API and database are healthy' });
+  });
 });
 
 io.on('connection', (socket) => {
