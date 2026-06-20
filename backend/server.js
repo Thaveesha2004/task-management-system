@@ -6,6 +6,7 @@ const { Server } = require('socket.io');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./config/swagger');
 const db = require('./config/db');
+const { hasDatabaseConfig } = require('./config/dbConfig');
 const taskRoutes = require('./routes/taskRoutes');
 const commentRoutes = require('./routes/commentRoutes');
 const projectRoutes = require('./routes/projectRoutes');
@@ -48,10 +49,11 @@ app.get('/', (req, res) => {
 });
 
 app.get('/api/health', (req, res) => {
-  if (!process.env.DB_HOST || !process.env.DB_USER || !process.env.DB_NAME) {
+  if (!hasDatabaseConfig()) {
     return res.status(503).json({
       status: 'error',
-      message: 'Database environment variables are missing on the server',
+      database: 'missing',
+      message: 'Set DATABASE_URL or DB_HOST, DB_USER, DB_NAME on the server',
     });
   }
 
@@ -59,12 +61,17 @@ app.get('/api/health', (req, res) => {
     if (err) {
       return res.status(503).json({
         status: 'error',
+        database: 'disconnected',
         message: 'Database connection failed',
         detail: err.message,
       });
     }
 
-    res.json({ status: 'ok', message: 'API and database are healthy' });
+    res.json({
+      status: 'ok',
+      database: 'connected',
+      message: 'API and database are healthy',
+    });
   });
 });
 

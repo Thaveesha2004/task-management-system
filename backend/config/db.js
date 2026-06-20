@@ -1,20 +1,16 @@
 const mysql = require('mysql2');
 const dotenv = require('dotenv');
+const { getPoolConfig } = require('./dbConfig');
 
 dotenv.config();
 
 const pool = mysql.createPool({
-  host: process.env.DB_HOST || 'localhost',
-  port: Number(process.env.DB_PORT) || 3306,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+  ...getPoolConfig(),
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
   enableKeepAlive: true,
   keepAliveInitialDelay: 0,
-  ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined,
 });
 
 pool.getConnection((err, connection) => {
@@ -27,6 +23,4 @@ pool.getConnection((err, connection) => {
   connection.release();
 });
 
-const db = pool;
-
-module.exports = db;
+module.exports = pool;
