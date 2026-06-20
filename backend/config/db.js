@@ -1,14 +1,53 @@
 const dns = require('dns');
 const { Pool } = require('pg');
 const dotenv = require('dotenv');
-const { getPoolConfig } = require('./dbConfig');
+const { getConnectionCandidates } = require('./dbConfig');
 
-// Render and other hosts often fail on Supabase direct IPv6 (ENETUNREACH)
 dns.setDefaultResultOrder('ipv4first');
-
 dotenv.config();
 
-const pool = new Pool(getPoolConfig());
+let pool = null;
+let activeConfigLabel = null;
+
+async function connectWithFallback() {
+  const candidates = getConnectionCandidates();
+
+  for (const candidate of candidates) {
+    const label = candidate.label || `${candidate.host}:${candidate.port}`;
+    const config = {
+      host: candidate.host,
+      port: candidate.port,
+      user: candidate.user,
+      password: candidate.password,
+      database: candidate.database,
+      ssl: candidate.ssl ?? { rejectUnauthorized: false },
+    };
+    const testPool = new Pool(config);
+
+    try {
+      await testPool.query('SELECT 1 AS ok');
+      if (pool) {
+        await pool.end().catch(() => {});
+      }
+      pool = testPool;
+      activeConfigLabel = label;
+      console.log(`PostgreSQL connected via ${label}`);
+      return pool;
+    } catch (error) {
+      console.error(`Database attempt failed (${label}): ${error.message}`);
+      await testPool.end().catch(() => {});
+    }
+  }
+
+  throw new Error('All database connection attempts failed');
+}
+
+function getPool() {
+  if (!pool) {
+    throw new Error('Database pool is not initialized');
+  }
+  return pool;
+}
 
 function toPgSql(sql) {
   let index = 0;
@@ -34,7 +73,7 @@ function query(sql, params, callback) {
 
   const pgSql = toPgSql(sql);
 
-  pool
+  getPool()
     .query(pgSql, params)
     .then((result) => {
       if (isSelectQuery(sql)) {
@@ -50,17 +89,12 @@ const db = {
   query,
   promise: () => ({
     query: (sql, params = []) =>
-      pool.query(toPgSql(sql), params).then((result) => [result.rows, result.fields]),
+      getPool()
+        .query(toPgSql(sql), params)
+        .then((result) => [result.rows, result.fields]),
   }),
+  connectWithFallback,
+  getActiveConfigLabel: () => activeConfigLabel,
 };
-
-pool
-  .query('SELECT 1')
-  .then(() => {
-    console.log('PostgreSQL database connected successfully!');
-  })
-  .catch((err) => {
-    console.error('Database connection failed:', err.message);
-  });
 
 module.exports = db;

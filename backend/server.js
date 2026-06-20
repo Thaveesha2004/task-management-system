@@ -71,6 +71,7 @@ app.get('/api/health', (req, res) => {
     res.json({
       status: 'ok',
       database: 'connected',
+      connection: db.getActiveConfigLabel(),
       message: 'API and database are healthy',
     });
   });
@@ -84,12 +85,24 @@ io.on('connection', (socket) => {
 });
 
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-  const { normalizeDatabaseUrl } = require('./config/dbConfig');
-  console.log(`Server running on port ${PORT}`);
-  console.log(`DATABASE_URL configured: ${Boolean(process.env.DATABASE_URL)}`);
-  if (process.env.DATABASE_URL) {
-    console.log(`DB target: ${normalizeDatabaseUrl(process.env.DATABASE_URL).replace(/:([^:@/]+)@/, ':***@')}`);
+
+async function startServer() {
+  try {
+    if (hasDatabaseConfig()) {
+      await db.connectWithFallback();
+    }
+  } catch (error) {
+    console.error('Database initialization failed:', error.message);
   }
-  console.log(`Swagger docs available at http://localhost:${PORT}/api-docs`);
-});
+
+  server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+    console.log(`DATABASE_URL configured: ${Boolean(process.env.DATABASE_URL)}`);
+    if (db.getActiveConfigLabel()) {
+      console.log(`DB connected via: ${db.getActiveConfigLabel()}`);
+    }
+    console.log(`Swagger docs available at http://localhost:${PORT}/api-docs`);
+  });
+}
+
+startServer();
