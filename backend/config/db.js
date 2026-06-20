@@ -1,6 +1,10 @@
+const dns = require('dns');
 const { Pool } = require('pg');
 const dotenv = require('dotenv');
 const { getPoolConfig } = require('./dbConfig');
+
+// Render and other hosts often fail on Supabase direct IPv6 (ENETUNREACH)
+dns.setDefaultResultOrder('ipv4first');
 
 dotenv.config();
 

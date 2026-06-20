@@ -1,9 +1,45 @@
+function isRenderHost() {
+  return Boolean(process.env.RENDER || process.env.RENDER_SERVICE_ID);
+}
+
+/**
+ * Render cannot reach Supabase direct host over IPv6 (ENETUNREACH).
+ * Rewrite direct db.*.supabase.co URLs to Session pooler on Render.
+ */
+function normalizeDatabaseUrl(url) {
+  if (!url) return url;
+
+  const usePooler =
+    process.env.USE_SUPABASE_POOLER === 'true' ||
+    process.env.SUPABASE_POOLER_URL ||
+    isRenderHost();
+
+  if (!usePooler) return url;
+
+  if (process.env.SUPABASE_POOLER_URL) {
+    return process.env.SUPABASE_POOLER_URL;
+  }
+
+  const directMatch = url.match(
+    /^postgres(?:ql)?:\/\/postgres:([^@]+)@db\.([^.]+)\.supabase\.co(?::\d+)?\/([^?]+)/
+  );
+
+  if (!directMatch) return url;
+
+  const [, password, projectRef, database] = directMatch;
+  const poolerHost =
+    process.env.SUPABASE_POOLER_HOST || 'aws-0-ap-southeast-1.pooler.supabase.com';
+  const poolerUser = `postgres.${projectRef}`;
+
+  return `postgresql://${poolerUser}:${password}@${poolerHost}:5432/${database}`;
+}
+
 function parseDatabaseUrl(url) {
-  const parsed = new URL(url);
+  const normalizedUrl = normalizeDatabaseUrl(url);
+  const parsed = new URL(normalizedUrl);
   const isRemote = parsed.hostname !== 'localhost' && parsed.hostname !== '127.0.0.1';
   const useSsl = process.env.DB_SSL === 'true' || isRemote;
 
-  // Let pg use our ssl config; sslmode=require in the URL can ignore rejectUnauthorized
   parsed.searchParams.delete('sslmode');
 
   return {
@@ -15,6 +51,7 @@ function parseDatabaseUrl(url) {
 function getPoolConfig() {
   const databaseUrl =
     process.env.DATABASE_URL ||
+    process.env.SUPABASE_POOLER_URL ||
     process.env.POSTGRES_URL ||
     process.env.DATABASE_PRIVATE_URL;
 
@@ -41,10 +78,11 @@ function getPoolConfig() {
 function hasDatabaseConfig() {
   return Boolean(
     process.env.DATABASE_URL ||
+      process.env.SUPABASE_POOLER_URL ||
       process.env.POSTGRES_URL ||
       process.env.DATABASE_PRIVATE_URL ||
       (process.env.DB_HOST && process.env.DB_USER && process.env.DB_NAME)
   );
 }
 
-module.exports = { getPoolConfig, hasDatabaseConfig };
+module.exports = { getPoolConfig, hasDatabaseConfig, normalizeDatabaseUrl };

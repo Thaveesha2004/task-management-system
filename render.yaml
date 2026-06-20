@@ -12,4 +12,6 @@ services:
         value: https://task-management-system-backend-z9y4.onrender.com
       - key: DB_SSL
         value: "true"
-      # Set DATABASE_URL manually in Render dashboard (Supabase connection string)
+      - key: SUPABASE_POOLER_HOST
+        value: aws-0-ap-southeast-1.pooler.supabase.com
+      # Set DATABASE_URL in Render dashboard (direct Supabase URI — auto-rewritten to pooler on Render)
