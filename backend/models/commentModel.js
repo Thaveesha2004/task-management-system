@@ -12,7 +12,8 @@ const CommentModel = {
 
   addComment: (commentData, callback) => {
     const sql = `INSERT INTO comments (task_id, user_id, comment_text) 
-                 VALUES (?, ?, ?)`;
+                 VALUES (?, ?, ?)
+                 RETURNING id`;
     const values = [
       commentData.task_id,
       commentData.user_id,

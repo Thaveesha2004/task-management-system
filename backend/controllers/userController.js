@@ -28,11 +28,12 @@ exports.createUser = async (req, res) => {
 
   db.query(
     `INSERT INTO users (role_id, full_name, email, password_hash, is_first_login, is_active)
-     VALUES (?, ?, ?, ?, TRUE, TRUE)`,
+     VALUES (?, ?, ?, ?, TRUE, TRUE)
+     RETURNING id`,
     [roleId, name, email, hashedPassword],
     (err, result) => {
       if (err) {
-        if (err.code === 'ER_DUP_ENTRY') {
+        if (err.code === '23505') {
           return res.status(400).json({ error: 'Bad Request', message: 'Email already exists' });
         }
         return res.status(500).json({ error: 'Internal Server Error', message: err.message });
@@ -81,7 +82,7 @@ exports.updateUser = (req, res) => {
 exports.deactivateUser = (req, res) => {
   const { id } = req.params;
 
-  db.query('UPDATE users SET is_active = 0 WHERE id = ?', [id], (err, result) => {
+  db.query('UPDATE users SET is_active = FALSE WHERE id = ?', [id], (err, result) => {
     if (err) return res.status(500).json({ error: 'Internal Server Error', message: err.message });
     if (result.affectedRows === 0) return res.status(404).json({ error: 'Not Found', message: 'User not found' });
     res.json({ message: 'User deactivated successfully' });
