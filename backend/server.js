@@ -1,6 +1,9 @@
+const dotenv = require('dotenv');
+
+dotenv.config();
+
 const express = require('express');
 const cors = require('cors');
-const dotenv = require('dotenv');
 const http = require('http');
 const { Server } = require('socket.io');
 const swaggerUi = require('swagger-ui-express');
@@ -12,8 +15,6 @@ const commentRoutes = require('./routes/commentRoutes');
 const projectRoutes = require('./routes/projectRoutes');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
-
-dotenv.config();
 
 const allowedOrigins = (process.env.CLIENT_ORIGIN || 'http://localhost:5173')
   .split(',')
@@ -85,5 +86,6 @@ io.on('connection', (socket) => {
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  console.log(`DATABASE_URL configured: ${Boolean(process.env.DATABASE_URL)}`);
   console.log(`Swagger docs available at http://localhost:${PORT}/api-docs`);
 });

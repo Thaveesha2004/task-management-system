@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: task-management-system-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install && npx prisma generate
+    startCommand: npm start
+    envVars:
+      - key: CLIENT_ORIGIN
+        value: https://task-managemnet-system.netlify.app
+      - key: API_BASE_URL
+        value: https://task-management-system-backend-z9y4.onrender.com
+      - key: DB_SSL
+        value: "true"
+      # Set DATABASE_URL manually in Render dashboard (Supabase connection string)
