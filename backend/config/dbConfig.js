@@ -3,8 +3,11 @@ function parseDatabaseUrl(url) {
   const isRemote = parsed.hostname !== 'localhost' && parsed.hostname !== '127.0.0.1';
   const useSsl = process.env.DB_SSL === 'true' || isRemote;
 
+  // Let pg use our ssl config; sslmode=require in the URL can ignore rejectUnauthorized
+  parsed.searchParams.delete('sslmode');
+
   return {
-    connectionString: url,
+    connectionString: parsed.toString(),
     ssl: useSsl ? { rejectUnauthorized: false } : undefined,
   };
 }
