@@ -56,6 +56,10 @@ jobs:
         working-directory: ./backend
         run: npm ci
 
+      - name: Generate Prisma client
+        working-directory: ./backend
+        run: npx prisma generate
+
       - name: Verify backend modules load
         working-directory: ./backend
         run: node -e "require('./config/swagger')"
