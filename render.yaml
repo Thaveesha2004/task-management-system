@@ -13,5 +13,5 @@ services:
       - key: DB_SSL
         value: "true"
       - key: SUPABASE_POOLER_HOST
-        value: aws-0-ap-southeast-1.pooler.supabase.com
+        value: aws-1-ap-southeast-1.pooler.supabase.com
       # Set DATABASE_URL in Render dashboard (direct Supabase URI — auto-rewritten to pooler on Render)
