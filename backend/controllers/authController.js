@@ -7,9 +7,6 @@ exports.login = async (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
 
-    console.log('email:', email);
-    console.log('password:', password);
-
     if (!email || !password) {
       return res.status(400).json({ error: 'Bad Request', message: 'Email and password are required' });
     }
@@ -21,15 +18,11 @@ exports.login = async (req, res) => {
 
     const [results] = await db.promise().query(query, [email]);
 
-    console.log('Results:', results);
-
     if (results.length === 0) {
       return res.status(401).json({ error: 'Unauthorized', message: 'Invalid email or password' });
     }
 
     const user = results[0];
-    console.log('password to compare:', password);
-    console.log('hash to compare:', user.password_hash);
 
     const match = await bcrypt.compare(password, user.password_hash);
 
