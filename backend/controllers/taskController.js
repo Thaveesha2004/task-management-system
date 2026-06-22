@@ -17,6 +17,15 @@ function validateDueDate(dueDate) {
   return null;
 }
 
+function getAssigneeIdsAsync(taskId) {
+  return new Promise((resolve, reject) => {
+    TaskModel.getAssigneeIds(taskId, (err, rows) => {
+      if (err) return reject(err);
+      resolve((rows || []).map((row) => Number(row.user_id)));
+    });
+  });
+}
+
 async function syncAssignments(taskId, assigneeIds = []) {
   await new Promise((resolve, reject) => {
     TaskModel.clearAssignments(taskId, (err) => (err ? reject(err) : resolve()));
@@ -27,6 +36,11 @@ async function syncAssignments(taskId, assigneeIds = []) {
       TaskModel.assignTask(taskId, userId, (err) => (err ? reject(err) : resolve()));
     });
   }
+}
+
+function recipientsExcept(actorId, userIds = []) {
+  const actor = Number(actorId);
+  return [...new Set(userIds.map((id) => Number(id)).filter((id) => Number.isFinite(id) && id !== actor))];
 }
 
 const TaskController = {
@@ -125,13 +139,18 @@ const TaskController = {
       try {
         if (Array.isArray(assignee_ids) && assignee_ids.length) {
           await syncAssignments(taskId, assignee_ids);
-          await notifyUsers(
-            assignee_ids,
-            'New task assigned',
-            `You were assigned to "${title}"`,
-            'assignment',
-            { emitTaskUpdate: true, taskId }
-          );
+          const recipients = recipientsExcept(req.user.id, assignee_ids);
+          if (recipients.length) {
+            await notifyUsers(
+              recipients,
+              'New task assigned',
+              `You were assigned to "${title}"`,
+              'assignment',
+              { emitTaskUpdate: true, taskId }
+            );
+          } else {
+            emitTaskUpdated(taskId);
+          }
         } else {
           emitTaskUpdated(taskId);
         }
@@ -239,15 +258,28 @@ const TaskController = {
         }
 
         try {
+          let previousAssigneeIds = [];
           if (Array.isArray(assignee_ids)) {
+            previousAssigneeIds = await getAssigneeIdsAsync(id);
             await syncAssignments(id, assignee_ids);
-          }
 
-          TaskModel.getAssigneeIds(id, async (_, assignees) => {
-            const ids = (assignees || []).map((row) => row.user_id);
-            if (status && status !== existing.status) {
+            const newlyAssigned = recipientsExcept(
+              req.user.id,
+              assignee_ids.filter((userId) => !previousAssigneeIds.includes(Number(userId)))
+            );
+
+            if (newlyAssigned.length) {
               await notifyUsers(
-                ids.filter((userId) => userId !== req.user.id),
+                newlyAssigned,
+                'New task assigned',
+                `You were assigned to "${title}"`,
+                'assignment',
+                { emitTaskUpdate: true, taskId: Number(id) }
+              );
+            } else if (status && status !== existing.status) {
+              const assignees = await getAssigneeIdsAsync(id);
+              await notifyUsers(
+                recipientsExcept(req.user.id, assignees),
                 'Task status updated',
                 `"${title}" is now "${status}"`,
                 'status_change',
@@ -256,7 +288,18 @@ const TaskController = {
             } else {
               emitTaskUpdated(Number(id));
             }
-          });
+          } else if (status && status !== existing.status) {
+            const assignees = await getAssigneeIdsAsync(id);
+            await notifyUsers(
+              recipientsExcept(req.user.id, assignees),
+              'Task status updated',
+              `"${title}" is now "${status}"`,
+              'status_change',
+              { emitTaskUpdate: true, taskId: Number(id) }
+            );
+          } else {
+            emitTaskUpdated(Number(id));
+          }
         } catch (notifyErr) {
           console.error('Task update notification error:', notifyErr.message);
         }

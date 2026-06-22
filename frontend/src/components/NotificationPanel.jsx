@@ -33,7 +33,11 @@ export default function NotificationPanel() {
     loadNotifications();
     const onNotification = () => loadNotifications();
     window.addEventListener('tms:notification', onNotification);
-    return () => window.removeEventListener('tms:notification', onNotification);
+    const interval = setInterval(loadNotifications, 30000);
+    return () => {
+      window.removeEventListener('tms:notification', onNotification);
+      clearInterval(interval);
+    };
   }, []);
 
   useEffect(() => {

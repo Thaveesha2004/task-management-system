@@ -28,7 +28,17 @@ function createNotification(userId, title, message, type = 'info', options = {})
 }
 
 async function notifyUsers(userIds, title, message, type = 'info', options = {}) {
-  const uniqueIds = [...new Set(userIds.filter(Boolean))];
+  const uniqueIds = [
+    ...new Set(
+      userIds
+        .filter(Boolean)
+        .map((id) => Number(id))
+        .filter((id) => Number.isFinite(id))
+    ),
+  ];
+
+  if (!uniqueIds.length) return;
+
   await Promise.all(
     uniqueIds.map((userId) => createNotification(userId, title, message, type, options))
   );
