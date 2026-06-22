@@ -43,8 +43,8 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="auth-page">
-      <form className="auth-card auth-card--narrow auth-form" onSubmit={handleSubmit}>
+    <div className="auth-page auth-page--light">
+      <form className="auth-card auth-card--narrow auth-card--centered auth-form" onSubmit={handleSubmit}>
         <h1>Reset your password</h1>
         <p className="muted">This is your first login. Please set a new password to continue.</p>
         {error && <div className="alert alert--error">{error}</div>}

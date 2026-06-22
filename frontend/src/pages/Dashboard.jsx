@@ -8,7 +8,7 @@ import TaskModal from '../components/TaskModal';
 import StatCard from '../components/StatCard';
 
 export default function Dashboard() {
-  const { mustResetPassword } = useAuth();
+  const { mustResetPassword, user } = useAuth();
   const { canManageTasks } = useRole();
   const [tasks, setTasks] = useState([]);
   const [users, setUsers] = useState([]);
@@ -17,6 +17,7 @@ export default function Dashboard() {
   const [selectedTask, setSelectedTask] = useState(null);
   const [creating, setCreating] = useState(false);
   const [viewMode, setViewMode] = useState('kanban');
+  const [search, setSearch] = useState('');
   const [filters, setFilters] = useState({
     status: '',
     priority: '',
@@ -75,6 +76,16 @@ export default function Dashboard() {
     }
   };
 
+  const displayedTasks = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    if (!term) return tasks;
+    return tasks.filter(
+      (t) =>
+        t.title?.toLowerCase().includes(term) ||
+        t.description?.toLowerCase().includes(term)
+    );
+  }, [tasks, search]);
+
   const stats = useMemo(() => ({
     total: tasks.length,
     todo: tasks.filter((t) => t.status === 'To Do').length,
@@ -82,35 +93,47 @@ export default function Dashboard() {
     done: tasks.filter((t) => t.status === 'Completed').length,
   }), [tasks]);
 
+  const greeting = useMemo(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good Morning';
+    if (hour < 17) return 'Good Afternoon';
+    return 'Good Evening';
+  }, []);
+
   if (mustResetPassword) {
     return <Navigate to="/reset-password" replace />;
   }
 
   return (
     <div className="dashboard page-enter">
-      <header className="dashboard__hero">
+      <header className="page-header">
         <div>
-          <p className="dashboard__eyebrow">Workspace</p>
-          <h2>Task Board</h2>
-          <p className="muted">Plan, assign, and track work in real time</p>
+          <h2>
+            {greeting}, {user?.name?.split(' ')[0] || 'there'}
+          </h2>
+          <p className="muted">Here&apos;s what&apos;s happening with your projects today.</p>
         </div>
-        {canManageTasks && (
-          <button
-            type="button"
-            className="btn btn--primary btn--glow"
-            onClick={() => setCreating(true)}
-          >
-            + New Task
-          </button>
-        )}
+        <div className="page-header__actions">
+          <input
+            className="search-input search-input--header"
+            placeholder="Search tasks…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          {canManageTasks && (
+            <button type="button" className="btn btn--primary" onClick={() => setCreating(true)}>
+              + New Task
+            </button>
+          )}
+        </div>
       </header>
 
       {!loading && !error && (
         <div className="stats-row">
-          <StatCard label="Total tasks" value={stats.total} accent="blue" icon="📊" />
-          <StatCard label="To Do" value={stats.todo} accent="slate" icon="📋" />
-          <StatCard label="In Progress" value={stats.inProgress} accent="amber" icon="⚡" />
-          <StatCard label="Completed" value={stats.done} accent="green" icon="✅" />
+          <StatCard label="Total Tasks" value={stats.total} accent="indigo" icon="📋" />
+          <StatCard label="In Progress" value={stats.inProgress} accent="blue" icon="🔄" />
+          <StatCard label="Completed" value={stats.done} accent="green" icon="✓" />
+          <StatCard label="To Do" value={stats.todo} accent="slate" icon="📝" />
         </div>
       )}
 
@@ -121,14 +144,14 @@ export default function Dashboard() {
             className={viewMode === 'kanban' ? 'is-active' : ''}
             onClick={() => setViewMode('kanban')}
           >
-            ⊞ Board
+            Board
           </button>
           <button
             type="button"
             className={viewMode === 'table' ? 'is-active' : ''}
             onClick={() => setViewMode('table')}
           >
-            ☰ Table
+            Table
           </button>
         </div>
 
@@ -161,55 +184,30 @@ export default function Dashboard() {
             onChange={(e) => setFilters((prev) => ({ ...prev, assigned_to: e.target.value }))}
           >
             <option value="">All assignees</option>
-            {users.map((user) => (
-              <option key={user.id} value={user.id}>
-                {user.name || user.full_name}
+            {users.map((u) => (
+              <option key={u.id} value={u.id}>
+                {u.name || u.full_name}
               </option>
             ))}
           </select>
-
-          <select
-            className="select-pill"
-            value={filters.sortBy}
-            onChange={(e) => setFilters((prev) => ({ ...prev, sortBy: e.target.value }))}
-          >
-            <option value="created_at">Sort: Created</option>
-            <option value="due_date">Sort: Due date</option>
-            <option value="priority">Sort: Priority</option>
-            <option value="title">Sort: Title</option>
-          </select>
-
-          <select
-            className="select-pill select-pill--compact"
-            value={filters.sortOrder}
-            onChange={(e) => setFilters((prev) => ({ ...prev, sortOrder: e.target.value }))}
-          >
-            <option value="desc">↓ Desc</option>
-            <option value="asc">↑ Asc</option>
-          </select>
         </div>
-
-        <button type="button" className="btn btn--ghost btn--icon" onClick={loadTasks} title="Refresh">
-          ↻ Refresh
-        </button>
       </div>
 
-      {error && <div className="alert alert--error alert--shake">{error}</div>}
+      {error && <div className="alert alert--error">{error}</div>}
       {loading ? (
         <div className="skeleton-board">
           {[1, 2, 3].map((col) => (
             <div key={col} className="skeleton-column">
               <div className="skeleton skeleton--title" />
               <div className="skeleton skeleton--card" />
-              <div className="skeleton skeleton--card" />
             </div>
           ))}
         </div>
-      ) : tasks.length === 0 && !error ? (
+      ) : displayedTasks.length === 0 && !error ? (
         <div className="empty-state">
           <span className="empty-state__icon">📭</span>
           <h3>No tasks yet</h3>
-          <p className="muted">Create your first task or adjust filters to see results.</p>
+          <p className="muted">Create your first task or adjust filters.</p>
           {canManageTasks && (
             <button type="button" className="btn btn--primary" onClick={() => setCreating(true)}>
               + Create Task
@@ -218,13 +216,14 @@ export default function Dashboard() {
         </div>
       ) : viewMode === 'kanban' ? (
         <KanbanBoard
-          tasks={tasks}
+          tasks={displayedTasks}
           onOpenTask={setSelectedTask}
           onStatusChange={handleStatusChange}
+          onAddTask={canManageTasks ? () => setCreating(true) : undefined}
         />
       ) : (
         <TaskTableView
-          tasks={tasks}
+          tasks={displayedTasks}
           onOpenTask={setSelectedTask}
           onStatusChange={handleStatusChange}
           canManageTasks={canManageTasks}

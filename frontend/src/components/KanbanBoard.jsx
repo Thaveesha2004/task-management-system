@@ -2,12 +2,12 @@ import { useMemo, useState } from 'react';
 import TaskCard from './TaskCard';
 
 const COLUMNS = [
-  { status: 'To Do', accent: 'todo', icon: '📋' },
-  { status: 'In Progress', accent: 'progress', icon: '⚡' },
-  { status: 'Completed', accent: 'done', icon: '✅' },
+  { status: 'To Do', accent: 'todo' },
+  { status: 'In Progress', accent: 'progress' },
+  { status: 'Completed', accent: 'done' },
 ];
 
-export default function KanbanBoard({ tasks, onOpenTask, onStatusChange }) {
+export default function KanbanBoard({ tasks, onOpenTask, onStatusChange, onAddTask }) {
   const [draggingId, setDraggingId] = useState(null);
   const [dropTarget, setDropTarget] = useState(null);
 
@@ -30,7 +30,7 @@ export default function KanbanBoard({ tasks, onOpenTask, onStatusChange }) {
 
   return (
     <div className="kanban">
-      {COLUMNS.map(({ status, accent, icon }) => (
+      {COLUMNS.map(({ status, accent }) => (
         <section
           key={status}
           className={`kanban__column kanban__column--${accent} ${dropTarget === status ? 'kanban__column--drop' : ''}`}
@@ -45,10 +45,7 @@ export default function KanbanBoard({ tasks, onOpenTask, onStatusChange }) {
           }}
         >
           <header>
-            <div className="kanban__column-title">
-              <span className="kanban__column-icon">{icon}</span>
-              <h2>{status}</h2>
-            </div>
+            <h2>{status}</h2>
             <span className="kanban__count">{grouped[status].length}</span>
           </header>
           <div className="kanban__list">
@@ -59,7 +56,7 @@ export default function KanbanBoard({ tasks, onOpenTask, onStatusChange }) {
                 onOpen={onOpenTask}
                 draggable
                 isDragging={draggingId === task.id}
-                style={{ animationDelay: `${index * 0.05}s` }}
+                style={{ animationDelay: `${index * 0.04}s` }}
                 onDragStart={() => setDraggingId(task.id)}
                 onDragEnd={() => {
                   setDraggingId(null);
@@ -69,11 +66,15 @@ export default function KanbanBoard({ tasks, onOpenTask, onStatusChange }) {
             ))}
             {grouped[status].length === 0 && (
               <div className="kanban__empty">
-                <span className="kanban__empty-icon">{icon}</span>
-                <p>Drop tasks here</p>
+                <p>No tasks in this column</p>
               </div>
             )}
           </div>
+          {onAddTask && status === 'To Do' && (
+            <button type="button" className="kanban__add" onClick={onAddTask}>
+              + Add Task
+            </button>
+          )}
         </section>
       ))}
     </div>

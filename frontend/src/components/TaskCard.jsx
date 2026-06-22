@@ -4,10 +4,16 @@ const PRIORITY_CLASS = {
   High: 'priority-high',
 };
 
+const PRIORITY_LABEL = {
+  Low: 'LOW',
+  Medium: 'MEDIUM',
+  High: 'HIGH PRIORITY',
+};
+
 function formatAssignees(task) {
   const list = Array.isArray(task.assignees) ? task.assignees : [];
   if (!list.length) return null;
-  return list.map((a) => a.full_name).join(', ');
+  return list.map((a) => a.full_name);
 }
 
 function isOverdue(dueDate, status) {
@@ -15,6 +21,15 @@ function isOverdue(dueDate, status) {
   const due = new Date(dueDate);
   due.setHours(23, 59, 59, 999);
   return due < new Date();
+}
+
+function getInitials(name = '') {
+  return name
+    .split(' ')
+    .map((p) => p[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
 }
 
 export default function TaskCard({
@@ -26,12 +41,13 @@ export default function TaskCard({
   onDragEnd,
   style,
 }) {
-  const assignees = formatAssignees(task);
+  const assigneeList = formatAssignees(task);
   const overdue = isOverdue(task.due_date, task.status);
+  const completed = task.status === 'Completed';
 
   return (
     <article
-      className={`task-card task-card--${(task.priority || 'medium').toLowerCase()} ${isDragging ? 'task-card--dragging' : ''} ${overdue ? 'task-card--overdue' : ''}`}
+      className={`task-card ${isDragging ? 'task-card--dragging' : ''} ${overdue ? 'task-card--overdue' : ''} ${completed ? 'task-card--done' : ''}`}
       draggable={draggable}
       style={style}
       onDragStart={onDragStart}
@@ -43,28 +59,33 @@ export default function TaskCard({
         if (e.key === 'Enter' || e.key === ' ') onOpen(task);
       }}
     >
-      <div className="task-card__accent" aria-hidden="true" />
       <div className="task-card__top">
         <span className={`priority-badge ${PRIORITY_CLASS[task.priority] || ''}`}>
-          {task.priority}
+          {PRIORITY_LABEL[task.priority] || task.priority}
         </span>
-        {task.due_date && (
-          <time dateTime={task.due_date} className={overdue ? 'task-card__due--overdue' : ''}>
-            {overdue ? '⚠ ' : ''}
-            {new Date(task.due_date).toLocaleDateString()}
-          </time>
-        )}
       </div>
       <h3>{task.title}</h3>
       {task.description && <p>{task.description}</p>}
-      <div className="task-card__meta">
-        <span className="task-card__id">#{task.id}</span>
-        {assignees && (
-          <span className="task-card__assignee" title={assignees}>
-            👤 {assignees}
-          </span>
+      <footer className="task-card__footer">
+        {task.due_date && (
+          <time dateTime={task.due_date} className={overdue ? 'task-card__due--overdue' : ''}>
+            {overdue ? 'Overdue: ' : ''}
+            {new Date(task.due_date).toLocaleDateString(undefined, {
+              month: 'short',
+              day: 'numeric',
+            })}
+          </time>
         )}
-      </div>
+        {assigneeList && (
+          <div className="task-card__avatars">
+            {assigneeList.slice(0, 3).map((name) => (
+              <span key={name} className="task-card__avatar" title={name}>
+                {getInitials(name)}
+              </span>
+            ))}
+          </div>
+        )}
+      </footer>
     </article>
   );
 }

@@ -3,17 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../api';
 import { useAuth } from '../context/AuthContext';
 
-const FEATURES = [
-  { icon: '📋', text: 'Kanban & table views' },
-  { icon: '🔔', text: 'Real-time notifications' },
-  { icon: '👥', text: 'Role-based teamwork' },
-];
-
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [remember, setRemember] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -43,73 +39,89 @@ export default function Login() {
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-card auth-card--animated">
-        <div className="auth-card__hero">
-          <span className="navbar__logo auth-card__logo">T</span>
-          <h1>Welcome to Taskora</h1>
-          <p>Sign in to manage tasks, collaborate with your team, and track progress in real time.</p>
-          <ul className="auth-features">
-            {FEATURES.map((item) => (
-              <li key={item.text}>
-                <span>{item.icon}</span>
-                {item.text}
-              </li>
-            ))}
-          </ul>
+    <div className="auth-page auth-page--light">
+      <div className="auth-card auth-card--centered">
+        <div className="auth-card__brand">
+          <span className="auth-logo" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="9" stroke="white" strokeWidth="2" />
+              <path d="M8 12l2.5 2.5L16 9" stroke="white" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+          </span>
+          <h1>Taskora</h1>
+          <p className="muted">Sign in to your workspace</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="auth-form">
-          <h2>Sign in</h2>
-          <p className="muted auth-form__subtitle">Enter your credentials to continue</p>
+        <form onSubmit={handleSubmit} className="auth-form auth-form--stacked">
           {error && <div className="alert alert--error">{error}</div>}
 
-          <label>
-            Email
-            <input
-              type="email"
-              className="input-field"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@tms.com"
-              autoComplete="email"
-              required
-            />
+          <label className="field">
+            <span>Work Email</span>
+            <div className="field__input-wrap">
+              <input
+                type="email"
+                className="input-field"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="name@company.com"
+                autoComplete="email"
+                required
+              />
+              <span className="field__icon" aria-hidden="true">
+                ✉
+              </span>
+            </div>
           </label>
 
-          <label>
-            Password
-            <input
-              type="password"
-              className="input-field"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
-              autoComplete="current-password"
-              required
-            />
+          <label className="field">
+            <span className="field__label-row">
+              <span>Password</span>
+            </span>
+            <div className="field__input-wrap">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                className="input-field"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                autoComplete="current-password"
+                required
+              />
+              <button
+                type="button"
+                className="field__icon field__icon-btn"
+                onClick={() => setShowPassword((v) => !v)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? '🙈' : '👁'}
+              </button>
+            </div>
           </label>
 
-          <button type="submit" className="btn btn--primary btn--full btn--glow" disabled={loading}>
-            {loading ? (
-              <>
-                <span className="spinner spinner--inline" />
-                Signing in…
-              </>
-            ) : (
-              'Sign In →'
-            )}
+          <label className="checkbox-row">
+            <input
+              type="checkbox"
+              checked={remember}
+              onChange={(e) => setRemember(e.target.checked)}
+            />
+            Remember this device
+          </label>
+
+          <button type="submit" className="btn btn--primary btn--full" disabled={loading}>
+            {loading ? 'Signing in…' : 'Sign In →'}
           </button>
-
-          <div className="auth-hint auth-hint--box">
-            <strong>Demo accounts</strong>
-            <p>
-              <code>sarah.j@tms.com</code> · PM &nbsp;|&nbsp; <code>emily.r@tms.com</code> · Collaborator
-            </p>
-            <p className="muted">Password: <code>Password@123</code></p>
-          </div>
         </form>
+
+        <p className="auth-footer-note">
+          <span aria-hidden="true">ⓘ</span> Access is managed by your administrator
+        </p>
       </div>
+
+      <footer className="auth-page-footer">
+        <span>Privacy Policy</span>
+        <span>Terms of Service</span>
+        <span>Help Center</span>
+      </footer>
     </div>
   );
 }
