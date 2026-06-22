@@ -23,7 +23,8 @@ async function getRoleId(roleName) {
 
 exports.createUser = async (req, res) => {
   try {
-    const { full_name, email, role } = req.body;
+    const full_name = req.body.full_name || req.body.name;
+    const { email, role } = req.body;
 
     if (!full_name || !email || !role) {
       return res.status(400).json({
@@ -58,14 +59,16 @@ exports.createUser = async (req, res) => {
     const tempPassword = generateTempPassword();
     const hashedPassword = await bcrypt.hash(tempPassword, 10);
 
-    const [result] = await db.promise().query(
-      'INSERT INTO users (full_name, email, password_hash, role_id) VALUES (?, ?, ?, ?)',
+    const [rows] = await db.promise().query(
+      'INSERT INTO users (full_name, email, password_hash, role_id, is_first_login) VALUES (?, ?, ?, ?, TRUE) RETURNING id',
       [full_name, email, hashedPassword, roleId]
     );
 
+    const userId = rows[0]?.id;
+
     try {
       await createNotification(
-        result.insertId,
+        userId,
         'Welcome to Taskora',
         'Your account was created. Use your temporary password on first login, then reset it.',
         'admin_update'
@@ -81,9 +84,9 @@ exports.createUser = async (req, res) => {
     }
 
     res.status(201).json({
-      message: 'User created successfully',
-      userId: result.insertId,
-      tempPassword,
+      message: `User created. Welcome email sent to ${email}.`,
+      userId,
+      emailSent: true,
     });
 
   } catch (err) {
