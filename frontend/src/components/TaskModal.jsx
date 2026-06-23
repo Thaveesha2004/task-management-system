@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../api';
 import { useRole } from '../context/AuthContext';
 import CommentSection from './CommentSection';
+import AssigneePicker from './AssigneePicker';
 
 const STATUSES = ['To Do', 'In Progress', 'Completed'];
 const PRIORITIES = ['Low', 'Medium', 'High'];
@@ -153,7 +154,7 @@ export default function TaskModal({
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal" onClick={(event) => event.stopPropagation()} role="dialog" aria-modal="true">
+      <div className="modal modal--wide" onClick={(event) => event.stopPropagation()} role="dialog" aria-modal="true">
         <div className="modal__header">
           <h2>{isNew ? 'Create Task' : readOnly ? 'Update Status' : 'Task Details'}</h2>
           <button type="button" className="icon-btn" onClick={onClose} aria-label="Close">
@@ -258,23 +259,11 @@ export default function TaskModal({
           </div>
 
           {canManageTasks && (
-            <fieldset className="assignee-fieldset">
-              <legend>Assign to</legend>
-              <div className="assignee-grid">
-                {users
-                  .filter((u) => u.is_active !== false)
-                  .map((member) => (
-                    <label key={member.id} className="assignee-chip">
-                      <input
-                        type="checkbox"
-                        checked={form.assignee_ids.some((id) => Number(id) === Number(member.id))}
-                        onChange={() => toggleAssignee(member.id)}
-                      />
-                      <span>{member.name || member.full_name}</span>
-                    </label>
-                  ))}
-              </div>
-            </fieldset>
+            <AssigneePicker
+              users={users}
+              selectedIds={form.assignee_ids}
+              onToggle={toggleAssignee}
+            />
           )}
 
           <div className="modal__actions">

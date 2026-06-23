@@ -48,7 +48,7 @@ export default function ResetPassword() {
     <div className="auth-page auth-page--animated">
       <AuthBackground />
       <div className="auth-page__toolbar">
-        <ThemeToggle className="theme-toggle--floating" />
+        <ThemeToggle className="theme-switch--floating" />
       </div>
       <form className="auth-card auth-card--narrow auth-card--centered auth-card--glass auth-form" onSubmit={handleSubmit}>
         <h1>Reset your password</h1>

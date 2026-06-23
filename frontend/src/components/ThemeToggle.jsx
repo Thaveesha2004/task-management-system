@@ -1,20 +1,33 @@
 import { useTheme } from '../context/ThemeContext';
+import { MoonIcon, SunIcon } from './Icons';
 
 export default function ThemeToggle({ className = '' }) {
-  const { theme, toggleTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
 
   return (
-    <button
-      type="button"
-      className={`theme-toggle ${className}`.trim()}
-      onClick={toggleTheme}
-      aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-      title={theme === 'dark' ? 'Light mode' : 'Dark mode'}
+    <div
+      className={`theme-switch ${className}`.trim()}
+      role="group"
+      aria-label="Color theme"
     >
-      <span className="theme-toggle__icon" aria-hidden="true">
-        {theme === 'dark' ? '☀️' : '🌙'}
-      </span>
-      <span className="theme-toggle__label">{theme === 'dark' ? 'Light' : 'Dark'}</span>
-    </button>
+      <button
+        type="button"
+        className={`theme-switch__btn ${theme === 'light' ? 'is-active' : ''}`}
+        onClick={() => setTheme('light')}
+        aria-label="Light mode"
+        title="Light mode"
+      >
+        <SunIcon size={16} />
+      </button>
+      <button
+        type="button"
+        className={`theme-switch__btn ${theme === 'dark' ? 'is-active' : ''}`}
+        onClick={() => setTheme('dark')}
+        aria-label="Dark mode"
+        title="Dark mode"
+      >
+        <MoonIcon size={16} />
+      </button>
+    </div>
   );
 }

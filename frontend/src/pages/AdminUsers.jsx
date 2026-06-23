@@ -6,6 +6,15 @@ import { useRole } from '../context/AuthContext';
 const ROLES = ['Admin', 'Project Manager', 'Collaborator'];
 const ROLE_FILTERS = ['All Members', 'Admins', 'PMs', 'Collaborators'];
 
+function normalizeUser(user) {
+  return {
+    ...user,
+    name: user.name || user.full_name,
+    role: user.role || user.role_name,
+    is_active: user.is_active !== false && user.is_active !== 0,
+  };
+}
+
 function getInitials(name = '') {
   return name
     .split(' ')
@@ -39,7 +48,8 @@ export default function AdminUsers() {
 
     try {
       const data = await api.getUsers();
-      setUsers(Array.isArray(data) ? data : []);
+      const list = Array.isArray(data) ? data : (data.data || []);
+      setUsers(list.map(normalizeUser));
     } catch (err) {
       setError(err.message);
     } finally {
@@ -57,16 +67,16 @@ export default function AdminUsers() {
     if (term) {
       list = list.filter(
         (user) =>
-          (user.name || user.full_name || '').toLowerCase().includes(term) ||
+          user.name?.toLowerCase().includes(term) ||
           user.email.toLowerCase().includes(term)
       );
     }
     if (roleFilter === 'Admins') {
-      list = list.filter((u) => (u.role || u.role_name) === 'Admin');
+      list = list.filter((u) => u.role === 'Admin');
     } else if (roleFilter === 'PMs') {
-      list = list.filter((u) => (u.role || u.role_name) === 'Project Manager');
+      list = list.filter((u) => u.role === 'Project Manager');
     } else if (roleFilter === 'Collaborators') {
-      list = list.filter((u) => (u.role || u.role_name) === 'Collaborator');
+      list = list.filter((u) => u.role === 'Collaborator');
     }
     return list;
   }, [users, search, roleFilter]);
@@ -105,9 +115,9 @@ export default function AdminUsers() {
     setEditId(user.id);
     setShowInvite(true);
     setForm({
-      name: user.name || user.full_name,
+      name: user.name,
       email: user.email,
-      role: user.role || user.role_name,
+      role: user.role,
     });
   };
 
@@ -134,8 +144,8 @@ export default function AdminUsers() {
     <div className="admin-page page-enter">
       <header className="page-header page-header--split">
         <div>
-          <h2>User Management</h2>
-          <p className="muted">Oversee workspace access, roles, and member activity.</p>
+          <h2>Team Management</h2>
+          <p className="muted">Manage workspace members, roles, and access.</p>
         </div>
         <button
           type="button"
@@ -175,7 +185,7 @@ export default function AdminUsers() {
 
       {showInvite && (
         <form className="panel panel--invite" onSubmit={handleSubmit}>
-          <h3>{editId ? 'Edit User' : 'Invite User'}</h3>
+          <h3>{editId ? 'Edit member' : 'Invite new member'}</h3>
           <div className="form-grid form-grid--3">
             <label>
               Full name
@@ -192,6 +202,7 @@ export default function AdminUsers() {
                 value={form.email}
                 onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
                 required
+                disabled={Boolean(editId)}
               />
             </label>
             <label>
@@ -221,65 +232,77 @@ export default function AdminUsers() {
 
       <section className="panel panel--flush">
         {loading ? (
-          <p className="muted panel__padding">Loading users…</p>
+          <p className="muted panel__padding">Loading members…</p>
         ) : (
           <div className="table-wrap admin-table">
-            <table>
+            <table className="data-table">
               <thead>
                 <tr>
-                  <th>User</th>
+                  <th>Member</th>
                   <th>Email</th>
                   <th>Role</th>
                   <th>Status</th>
-                  <th>Actions</th>
+                  <th className="data-table__actions-col">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredUsers.map((user) => {
-                  const role = user.role || user.role_name;
-                  const active = user.is_active !== false && user.is_active !== 0;
-                  return (
+                {filteredUsers.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="data-table__empty muted">
+                      No members match your filters
+                    </td>
+                  </tr>
+                ) : (
+                  filteredUsers.map((user) => (
                     <tr key={user.id}>
                       <td>
-                        <span className="table-assignee">
-                          <span className="table-assignee__avatar">{getInitials(user.name || user.full_name)}</span>
-                          {user.name || user.full_name}
+                        <span className="table-user">
+                          <span className="table-user__avatar">{getInitials(user.name)}</span>
+                          <span className="table-user__name">{user.name}</span>
                         </span>
                       </td>
-                      <td>{user.email}</td>
+                      <td className="data-table__email">{user.email}</td>
                       <td>
-                        <span className={`role-badge ${roleBadgeClass(role)}`}>{role}</span>
-                      </td>
-                      <td>
-                        <span className={`status-dot ${active ? 'is-active' : ''}`}>
-                          {active ? 'Active' : 'Inactive'}
+                        <span className={`role-badge ${roleBadgeClass(user.role)}`}>
+                          {user.role}
                         </span>
                       </td>
-                      <td className="table-actions">
-                        <button type="button" className="btn btn--ghost btn--small" onClick={() => startEdit(user)}>
-                          Edit
-                        </button>
-                        {active ? (
+                      <td>
+                        <span className={`status-pill ${user.is_active ? 'status-pill--active' : 'status-pill--inactive'}`}>
+                          {user.is_active ? 'Active' : 'Inactive'}
+                        </span>
+                      </td>
+                      <td className="data-table__actions-col">
+                        <div className="table-actions">
                           <button
                             type="button"
                             className="btn btn--ghost btn--small"
-                            onClick={() => handleDeactivate(user.id)}
+                            onClick={() => startEdit(user)}
                           >
-                            Deactivate
+                            Edit
                           </button>
-                        ) : (
-                          <button
-                            type="button"
-                            className="btn btn--ghost btn--small"
-                            onClick={() => handleActivate(user.id)}
-                          >
-                            Activate
-                          </button>
-                        )}
+                          {user.is_active ? (
+                            <button
+                              type="button"
+                              className="btn btn--ghost btn--small btn--danger-text"
+                              onClick={() => handleDeactivate(user.id)}
+                            >
+                              Deactivate
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              className="btn btn--ghost btn--small"
+                              onClick={() => handleActivate(user.id)}
+                            >
+                              Activate
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
-                  );
-                })}
+                  ))
+                )}
               </tbody>
             </table>
             <div className="table-footer muted">

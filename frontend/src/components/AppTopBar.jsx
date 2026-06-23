@@ -9,7 +9,7 @@ export default function AppTopBar({ connected }) {
         <span className="muted">Velocity workspace</span>
       </div>
       <div className="topbar__actions">
-        <ThemeToggle className="theme-toggle--compact" />
+        <ThemeToggle />
         <NotificationPanel />
         <span
           className={`topbar__live ${connected ? 'is-live' : ''}`}

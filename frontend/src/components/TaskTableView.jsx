@@ -1,3 +1,5 @@
+import AvatarStack from './AvatarStack';
+
 const PRIORITY_CLASS = {
   Low: 'priority-low',
   Medium: 'priority-medium',
@@ -10,61 +12,43 @@ const STATUS_CLASS = {
   Completed: 'status-done',
 };
 
-function formatAssignees(task) {
-  if (!task.assignees || task.assignees === '[]') return 'Unassigned';
-  const list = Array.isArray(task.assignees) ? task.assignees : [];
-  if (!list.length) return 'Unassigned';
-  return list.map((a) => a.full_name).join(', ');
-}
-
-function getInitials(name = '') {
-  return name
-    .split(' ')
-    .map((p) => p[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
-}
-
 export default function TaskTableView({ tasks, onOpenTask, onStatusChange, canManageTasks }) {
   return (
-    <div className="table-wrap task-table">
-      <table>
+    <div className="table-wrap task-table panel panel--flush">
+      <table className="data-table">
         <thead>
           <tr>
-            <th>Title</th>
-            <th>Assignee</th>
+            <th>Task</th>
+            <th>Assignees</th>
             <th>Priority</th>
             <th>Status</th>
-            <th>Due Date</th>
+            <th>Due date</th>
           </tr>
         </thead>
         <tbody>
           {tasks.length === 0 ? (
             <tr>
-              <td colSpan={5} className="muted table-empty">
+              <td colSpan={5} className="data-table__empty muted">
                 No tasks match your filters
               </td>
             </tr>
           ) : (
             tasks.map((task) => {
               const assignees = Array.isArray(task.assignees) ? task.assignees : [];
-              const primary = assignees[0];
               return (
-                <tr key={task.id} className="task-table__row" onClick={() => onOpenTask(task)}>
+                <tr
+                  key={task.id}
+                  className="data-table__row--clickable"
+                  onClick={() => onOpenTask(task)}
+                >
                   <td>
-                    <strong>{task.title}</strong>
-                    {task.description && <p className="muted table-desc">{task.description}</p>}
+                    <strong className="data-table__title">{task.title}</strong>
+                    {task.description && (
+                      <p className="muted table-desc">{task.description}</p>
+                    )}
                   </td>
                   <td>
-                    {primary ? (
-                      <span className="table-assignee">
-                        <span className="table-assignee__avatar">{getInitials(primary.full_name)}</span>
-                        {primary.full_name}
-                      </span>
-                    ) : (
-                      'Unassigned'
-                    )}
+                    <AvatarStack assignees={assignees} />
                   </td>
                   <td>
                     <span className={`priority-badge ${PRIORITY_CLASS[task.priority] || ''}`}>
@@ -76,6 +60,7 @@ export default function TaskTableView({ tasks, onOpenTask, onStatusChange, canMa
                       className={`table-select status-pill ${STATUS_CLASS[task.status] || ''}`}
                       value={task.status}
                       onChange={(e) => onStatusChange(task, e.target.value)}
+                      disabled={!canManageTasks && false}
                     >
                       {['To Do', 'In Progress', 'Completed'].map((status) => (
                         <option key={status} value={status}>
@@ -84,7 +69,15 @@ export default function TaskTableView({ tasks, onOpenTask, onStatusChange, canMa
                       ))}
                     </select>
                   </td>
-                  <td>{task.due_date ? new Date(task.due_date).toLocaleDateString() : '—'}</td>
+                  <td className="data-table__date">
+                    {task.due_date
+                      ? new Date(task.due_date).toLocaleDateString(undefined, {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })
+                      : '—'}
+                  </td>
                 </tr>
               );
             })
