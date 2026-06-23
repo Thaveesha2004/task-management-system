@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { api } from '../api';
+import { BellIcon } from './Icons';
 
 const TYPE_ICONS = {
   assignment: '📌',
@@ -77,7 +78,7 @@ export default function NotificationPanel() {
         onClick={() => setOpen((prev) => !prev)}
         aria-label="Notifications"
       >
-        🔔
+        <BellIcon size={18} />
         {unread > 0 && <span className="notification-bell__badge">{unread}</span>}
       </button>
 

@@ -4,6 +4,7 @@ import { api } from '../api';
 import { useAuth } from '../context/AuthContext';
 import AuthBackground from '../components/AuthBackground';
 import ThemeToggle from '../components/ThemeToggle';
+import { EyeIcon, EyeOffIcon, MailIcon } from '../components/Icons';
 
 export default function Login() {
   const { login } = useAuth();
@@ -44,7 +45,7 @@ export default function Login() {
     <div className="auth-page auth-page--animated">
       <AuthBackground />
       <div className="auth-page__toolbar">
-        <ThemeToggle className="theme-toggle--floating" />
+        <ThemeToggle className="theme-switch--floating" />
       </div>
       <div className="auth-card auth-card--centered auth-card--glass">
         <div className="auth-card__brand">
@@ -74,7 +75,7 @@ export default function Login() {
                 required
               />
               <span className="field__icon" aria-hidden="true">
-                ✉
+                <MailIcon size={16} />
               </span>
             </div>
           </label>
@@ -99,7 +100,7 @@ export default function Login() {
                 onClick={() => setShowPassword((v) => !v)}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
-                {showPassword ? '🙈' : '👁'}
+                {showPassword ? <EyeOffIcon size={16} /> : <EyeIcon size={16} />}
               </button>
             </div>
           </label>

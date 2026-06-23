@@ -138,7 +138,7 @@ exports.getUsers = async (req, res) => {
        JOIN roles r ON u.role_id = r.id
        ORDER BY u.id`
     );
-    res.json(results);
+    res.json({ success: true, data: results });
   } catch (err) {
     res.status(500).json({ errorCode: 'INTERNAL_ERROR', message: err.message });
   }
