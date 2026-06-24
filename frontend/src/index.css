@@ -1388,6 +1388,52 @@ textarea:focus,
   color: var(--text);
 }
 
+.animated-number {
+  display: inline-block;
+  min-width: 1ch;
+  transition: color 0.25s ease;
+}
+
+.animated-number--up {
+  animation: countPulseUp 0.52s ease;
+  color: var(--primary);
+}
+
+.animated-number--down {
+  animation: countPulseDown 0.52s ease;
+  color: var(--med);
+}
+
+@keyframes countPulseUp {
+  0% {
+    transform: translateY(6px) scale(0.92);
+    opacity: 0.55;
+  }
+  55% {
+    transform: translateY(-2px) scale(1.06);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes countPulseDown {
+  0% {
+    transform: translateY(-6px) scale(1.06);
+    opacity: 0.55;
+  }
+  55% {
+    transform: translateY(2px) scale(0.94);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
 .stat-card__label {
   font-size: 0.82rem;
   color: var(--text-muted);
