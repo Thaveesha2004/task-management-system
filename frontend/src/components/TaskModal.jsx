@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { api } from '../api';
 import { useRole } from '../context/AuthContext';
 import CommentSection from './CommentSection';
@@ -35,6 +35,8 @@ export default function TaskModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [pendingFiles, setPendingFiles] = useState([]);
+  const titleInputRef = useRef(null);
+  const modalRef = useRef(null);
 
   useEffect(() => {
     if (task) {
@@ -88,6 +90,25 @@ export default function TaskModal({
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [onClose]);
+
+  useEffect(() => {
+    if (modalRef.current) {
+      modalRef.current.focus({ preventScroll: true });
+    }
+    const focusTarget =
+      titleInputRef.current && !titleInputRef.current.disabled
+        ? titleInputRef.current
+        : modalRef.current?.querySelector('select:not([disabled]), textarea:not([disabled])');
+    if (focusTarget) {
+      window.setTimeout(() => focusTarget.focus({ preventScroll: true }), 50);
+    }
+  }, [task, isNew]);
+
+  useEffect(() => {
+    if (!error || !modalRef.current) return;
+    const alert = modalRef.current.querySelector('.alert--error');
+    alert?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, [error]);
 
   const updateField = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -176,7 +197,14 @@ export default function TaskModal({
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal modal--wide" onClick={(event) => event.stopPropagation()} role="dialog" aria-modal="true">
+      <div
+        ref={modalRef}
+        className="modal modal--wide"
+        onClick={(event) => event.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        tabIndex={-1}
+      >
         <div className="modal__header">
           <h2>{isNew ? 'Create Task' : readOnly ? 'Update Status' : 'Task Details'}</h2>
           <button type="button" className="icon-btn" onClick={onClose} aria-label="Close">
@@ -190,6 +218,7 @@ export default function TaskModal({
           <label>
             Title
             <input
+              ref={titleInputRef}
               value={form.title}
               onChange={(e) => updateField('title', e.target.value)}
               required

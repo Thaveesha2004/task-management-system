@@ -2540,6 +2540,31 @@ textarea:focus,
   margin-bottom: 20px;
 }
 
+.panel--editing {
+  border: 1px solid color-mix(in srgb, var(--primary) 38%, var(--border));
+}
+
+.scroll-target {
+  scroll-margin-top: 96px;
+  scroll-margin-bottom: 32px;
+}
+
+.scroll-target--highlight {
+  animation: scrollTargetPulse 1.15s ease;
+}
+
+@keyframes scrollTargetPulse {
+  0%,
+  100% {
+    box-shadow: var(--shadow-card);
+  }
+  40% {
+    box-shadow:
+      0 0 0 3px color-mix(in srgb, var(--primary) 22%, transparent),
+      var(--shadow-md);
+  }
+}
+
 .panel--flush {
   padding: 0;
   overflow: hidden;
