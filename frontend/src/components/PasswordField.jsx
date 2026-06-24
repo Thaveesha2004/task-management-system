@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { EyeIcon, EyeOffIcon } from './Icons';
 
 export default function PasswordField({
@@ -14,12 +14,18 @@ export default function PasswordField({
   id,
   preventAutofill = false,
 }) {
+  const inputRef = useRef(null);
   const [visible, setVisible] = useState(false);
   const [readOnly, setReadOnly] = useState(preventAutofill);
   const fieldId = id || label.toLowerCase().replace(/\s+/g, '-');
 
-  const handleFocus = () => {
-    if (preventAutofill) setReadOnly(false);
+  const useMaskedText = preventAutofill && !visible;
+  const inputType = useMaskedText || visible ? 'text' : 'password';
+
+  const unlockField = () => {
+    if (!preventAutofill || !readOnly) return;
+    setReadOnly(false);
+    requestAnimationFrame(() => inputRef.current?.focus());
   };
 
   return (
@@ -27,15 +33,25 @@ export default function PasswordField({
       <span>{label}</span>
       <div className={`field__input-wrap${error ? ' field__input-wrap--error' : ''}`}>
         <input
+          ref={inputRef}
           id={fieldId}
-          name={name}
-          type={visible ? 'text' : 'password'}
-          className="input-field"
+          name={preventAutofill ? undefined : name}
+          type={inputType}
+          className={`input-field${useMaskedText ? ' input-field--masked' : ''}`}
           value={value}
           onChange={onChange}
-          onFocus={handleFocus}
+          onMouseDown={(event) => {
+            if (preventAutofill && readOnly) {
+              event.preventDefault();
+              unlockField();
+            }
+          }}
+          onFocus={unlockField}
           placeholder={placeholder}
           autoComplete={preventAutofill ? 'off' : autoComplete}
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck={false}
           readOnly={readOnly}
           required={required}
           disabled={disabled}
@@ -43,6 +59,7 @@ export default function PasswordField({
           aria-describedby={error ? `${fieldId}-error` : undefined}
           data-1p-ignore={preventAutofill ? 'true' : undefined}
           data-lpignore={preventAutofill ? 'true' : undefined}
+          data-bwignore={preventAutofill ? 'true' : undefined}
         />
         <button
           type="button"

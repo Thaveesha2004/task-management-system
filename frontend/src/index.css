@@ -1163,6 +1163,11 @@ textarea {
   padding-right: 40px;
 }
 
+.input-field--masked {
+  -webkit-text-security: disc;
+  text-security: disc;
+}
+
 textarea {
   resize: vertical;
   min-height: 80px;

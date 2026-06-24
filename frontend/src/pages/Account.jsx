@@ -250,6 +250,8 @@ export default function Account() {
                     className="account-password-form scroll-target panel--editing"
                     onSubmit={handlePasswordSubmit}
                     autoComplete="off"
+                    data-lpignore="true"
+                    data-1p-ignore="true"
                   >
                     <h4>Change password</h4>
                     <p className="muted">
@@ -257,8 +259,7 @@ export default function Account() {
                     </p>
 
                     <PasswordField
-                      id="account-current-password"
-                      name="account-current-credential"
+                      id="account-verify-input"
                       label="Current password"
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
@@ -266,8 +267,7 @@ export default function Account() {
                       required
                     />
                     <PasswordField
-                      id="account-new-password"
-                      name="account-new-credential"
+                      id="account-set-input-a"
                       label="New password"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
@@ -276,8 +276,7 @@ export default function Account() {
                       error={newPasswordError}
                     />
                     <PasswordField
-                      id="account-confirm-password"
-                      name="account-confirm-credential"
+                      id="account-set-input-b"
                       label="Confirm new password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
