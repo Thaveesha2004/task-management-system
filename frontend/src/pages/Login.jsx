@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import AuthBackground from '../components/AuthBackground';
 import ThemeToggle from '../components/ThemeToggle';
 import { EyeIcon, EyeOffIcon, MailIcon, InfoIcon } from '../components/Icons';
-import { clearStoredAuth, getValidStoredAuth } from '../utils/authStorage';
+import { clearStoredAuth, getRememberedAuth, getValidStoredAuth, restoreRememberedAuth } from '../utils/authStorage';
 
 export default function Login() {
   const { login } = useAuth();
@@ -16,14 +16,13 @@ export default function Login() {
   const [remember, setRemember] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const rememberedAuth = getRememberedAuth();
 
   useEffect(() => {
     const validAuth = getValidStoredAuth();
     if (validAuth) {
       navigate('/', { replace: true });
-      return;
     }
-    clearStoredAuth();
   }, [navigate]);
 
   const handleSubmit = async (event) => {
@@ -37,7 +36,7 @@ export default function Login() {
         token: response.token,
         user: response.user,
         mustResetPassword: response.mustResetPassword,
-      });
+      }, { remember });
 
       if (response.mustResetPassword) {
         navigate('/reset-password');
@@ -52,6 +51,17 @@ export default function Login() {
       setError(message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleRestoreSession = () => {
+    const restored = restoreRememberedAuth();
+    if (!restored) return;
+    login(restored, { remember: true });
+    if (restored.mustResetPassword) {
+      navigate('/reset-password');
+    } else {
+      navigate('/');
     }
   };
 
@@ -77,6 +87,17 @@ export default function Login() {
 
         <form onSubmit={handleSubmit} className="auth-form auth-form--stacked">
           {error && <div className="alert alert--error">{error}</div>}
+
+          {rememberedAuth && (
+            <div className="auth-hint auth-hint--box">
+              <p style={{ margin: '0 0 10px' }}>
+                Saved sign-in for <strong>{rememberedAuth.user?.email}</strong> on this device.
+              </p>
+              <button type="button" className="btn btn--ghost btn--full" onClick={handleRestoreSession}>
+                Continue as {rememberedAuth.user?.name}
+              </button>
+            </div>
+          )}
 
           <label className="field" htmlFor="email">
             <span>Work Email</span>
@@ -134,8 +155,12 @@ export default function Login() {
               checked={remember}
               onChange={(e) => setRemember(e.target.checked)}
             />
-            Remember this device
+            Remember me on this device
           </label>
+
+          <p className="auth-hint">
+            Each browser tab can stay signed in to a different account.
+          </p>
 
           <button type="submit" className="btn btn--primary btn--full" disabled={loading}>
             {loading ? 'Signing in…' : 'Sign In →'}

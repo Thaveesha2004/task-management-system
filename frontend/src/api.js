@@ -258,7 +258,7 @@ export const api = {
     const response = await fetch(`${API_BASE}/attachments/download/${id}`, { headers });
 
     if (response.status === 401) {
-      localStorage.removeItem('tms_auth');
+      clearStoredAuth();
       if (!window.location.pathname.includes('/login')) {
         window.location.href = '/login';
       }
