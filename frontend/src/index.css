@@ -3412,6 +3412,88 @@ tr:last-child td {
   font-size: 0.85rem;
 }
 
+.toast--clickable {
+  cursor: pointer;
+}
+
+.toast--clickable:hover {
+  border-color: var(--primary);
+}
+
+.toast__action {
+  display: block;
+  margin-top: 6px;
+  color: var(--primary);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* ─── Assignment alert ─── */
+
+.assignment-alert-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(2px);
+}
+
+.assignment-alert {
+  width: min(100%, 420px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px 24px 22px;
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+}
+
+.assignment-alert__icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 14px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  color: var(--primary);
+}
+
+.assignment-alert h2 {
+  margin: 0 0 8px;
+  font-size: 1.15rem;
+}
+
+.assignment-alert p {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.assignment-alert__hint {
+  margin-top: 10px !important;
+  font-size: 0.85rem;
+}
+
+.assignment-alert__actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.notification-item--link:hover {
+  border-color: var(--primary);
+}
+
+.notification-item--link p::after {
+  content: ' · Open task';
+  color: var(--primary);
+  font-weight: 600;
+}
+
 
 /* ─── Loading & skeleton ─── */
 

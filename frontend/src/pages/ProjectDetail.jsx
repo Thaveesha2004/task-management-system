@@ -67,6 +67,19 @@ export default function ProjectDetail() {
     }
   }, [searchParams, canManageTasks, setSearchParams]);
 
+  useEffect(() => {
+    const taskId = searchParams.get('task');
+    if (!taskId || loading) return;
+
+    const task = tasks.find((item) => String(item.id) === String(taskId));
+    if (!task) return;
+
+    setSelectedTask(task);
+    const next = new URLSearchParams(searchParams);
+    next.delete('task');
+    setSearchParams(next, { replace: true });
+  }, [searchParams, tasks, loading, setSearchParams]);
+
   const handleStatusChange = async (task, status) => {
     if (task.status === status) return;
 
