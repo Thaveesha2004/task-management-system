@@ -1,20 +1,30 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../api';
 import { useAuth } from '../context/AuthContext';
 import AuthBackground from '../components/AuthBackground';
 import ThemeToggle from '../components/ThemeToggle';
-import { EyeIcon, EyeOffIcon, MailIcon, InfoIcon } from '../components/Icons';
+import PasswordField from '../components/PasswordField';
+import { MailIcon, InfoIcon } from '../components/Icons';
+import { clearStoredAuth, getValidStoredAuth } from '../utils/authStorage';
 
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const validAuth = getValidStoredAuth();
+    if (validAuth) {
+      navigate('/', { replace: true });
+      return;
+    }
+    clearStoredAuth();
+  }, [navigate]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -35,7 +45,11 @@ export default function Login() {
         navigate('/');
       }
     } catch (err) {
-      setError(err.message);
+      const message =
+        err.message === 'Invalid email or password'
+          ? 'Invalid email or password. If you used Forgot password recently, sign in with the temporary password from your email.'
+          : err.message;
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -61,19 +75,21 @@ export default function Login() {
           <p className="muted">Sign in to your workspace</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="auth-form auth-form--stacked">
+        <form onSubmit={handleSubmit} className="auth-form auth-form--stacked" autoComplete="off">
           {error && <div className="alert alert--error">{error}</div>}
 
           <label className="field">
             <span>Work Email</span>
             <div className="field__input-wrap">
               <input
+                id="tms-login-email"
+                name="tms-login-email"
                 type="email"
                 className="input-field"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@company.com"
-                autoComplete="email"
+                autoComplete="off"
                 required
               />
               <span className="field__icon" aria-hidden="true">
@@ -82,33 +98,22 @@ export default function Login() {
             </div>
           </label>
 
-          <label className="field">
-            <span className="field__label-row">
-              <span>Password</span>
-              <Link to="/forgot-password" className="auth-link auth-link--inline">
-                Forgot password?
-              </Link>
-            </span>
-            <div className="field__input-wrap">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                className="input-field"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                autoComplete="current-password"
-                required
-              />
-              <button
-                type="button"
-                className="field__icon field__icon-btn"
-                onClick={() => setShowPassword((v) => !v)}
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
-              >
-                {showPassword ? <EyeOffIcon size={16} /> : <EyeIcon size={16} />}
-              </button>
-            </div>
-          </label>
+          <PasswordField
+            id="tms-login-secret"
+            label={
+              <span className="field__label-row">
+                <span>Password</span>
+                <Link to="/forgot-password" className="auth-link auth-link--inline">
+                  Forgot password?
+                </Link>
+              </span>
+            }
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Enter your password"
+            preventAutofill
+            required
+          />
 
           <label className="checkbox-row">
             <input

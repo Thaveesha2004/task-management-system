@@ -1,10 +1,14 @@
-import { createContext, useContext, useMemo, useState } from 'react';
-import { getStoredAuth } from '../api';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { getValidStoredAuth } from '../utils/authStorage';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [auth, setAuth] = useState(() => getStoredAuth());
+  const [auth, setAuth] = useState(() => getValidStoredAuth());
+
+  useEffect(() => {
+    setAuth(getValidStoredAuth());
+  }, []);
 
   const login = (payload) => {
     localStorage.setItem('tms_auth', JSON.stringify(payload));
