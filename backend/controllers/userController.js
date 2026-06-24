@@ -3,15 +3,7 @@ const db = require('../config/db');
 const { sendWelcomeEmail, isEmailConfigured } = require('../utils/sendEmail');
 const { createNotification } = require('../services/notificationService');
 const { PASSWORD_REGEX } = require('../utils/errors');
-
-function generateTempPassword() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#';
-  let password = 'Aa1';
-  for (let i = 0; i < 9; i += 1) {
-    password += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return password;
-}
+const generateTempPassword = require('../utils/generateTempPassword');
 
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);

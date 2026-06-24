@@ -49,6 +49,14 @@ export const api = {
     }).then(handleResponse);
   },
 
+  forgotPassword(identifier) {
+    return fetch(`${API_BASE}/auth/forgot-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: identifier, username: identifier }),
+    }).then(handleResponse);
+  },
+
   resetPassword(newPassword) {
     return fetch(`${API_BASE}/auth/reset-password`, {
       method: 'POST',

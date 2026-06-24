@@ -80,6 +80,55 @@ async function sendWelcomeEmail(toEmail, fullName, temporaryPassword) {
   return data;
 }
 
+async function sendForgotPasswordEmail(toEmail, fullName, temporaryPassword) {
+  const client = getClient();
+
+  if (!isEmailConfigured() || !client) {
+    throw new Error('Resend not configured. Set RESEND_API_KEY and EMAIL_FROM on the server.');
+  }
+
+  const loginUrl = `${getFrontendUrl()}/login`;
+  const safeName = escapeHtml(fullName);
+  const safeEmail = escapeHtml(toEmail);
+  const safePassword = escapeHtml(temporaryPassword);
+
+  const { data, error } = await client.emails.send({
+    from: getFromAddress(),
+    to: [toEmail.trim()],
+    subject: 'Taskora — your temporary password',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 560px; margin: 0 auto;">
+        <h2>Password reset request</h2>
+        <p>Hi ${safeName},</p>
+        <p>We received a request to reset your Taskora password. Use the temporary password below to sign in.</p>
+        <div style="background: #f4f6fa; padding: 16px; border-radius: 8px; margin: 16px 0;">
+          <p style="margin: 0 0 8px;"><strong>Email:</strong> ${safeEmail}</p>
+          <p style="margin: 0;"><strong>Temporary password:</strong> ${safePassword}</p>
+        </div>
+        <p><a href="${loginUrl}" style="background:#1a2230;color:#fff;padding:12px 24px;text-decoration:none;border-radius:8px;">Sign in to Taskora</a></p>
+        <p style="color:#666;font-size:14px;">After signing in, you will be asked to choose a new password.</p>
+        <p style="color:#666;font-size:14px;">If you did not request this, contact your administrator.</p>
+      </div>
+    `,
+    text: [
+      `Hi ${fullName},`,
+      'We received a request to reset your Taskora password.',
+      `Email: ${toEmail}`,
+      `Temporary password: ${temporaryPassword}`,
+      `Sign in: ${loginUrl}`,
+      'After signing in, you will be asked to choose a new password.',
+      'If you did not request this, contact your administrator.',
+    ].join('\n'),
+  });
+
+  if (error) {
+    throw new Error(error.message || 'Failed to send password reset email');
+  }
+
+  return data;
+}
+
 module.exports = sendWelcomeEmail;
 module.exports.isEmailConfigured = isEmailConfigured;
 module.exports.sendWelcomeEmail = sendWelcomeEmail;
+module.exports.sendForgotPasswordEmail = sendForgotPasswordEmail;

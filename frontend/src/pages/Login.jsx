@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../api';
 import { useAuth } from '../context/AuthContext';
 import AuthBackground from '../components/AuthBackground';
@@ -85,6 +85,9 @@ export default function Login() {
           <label className="field">
             <span className="field__label-row">
               <span>Password</span>
+              <Link to="/forgot-password" className="auth-link auth-link--inline">
+                Forgot password?
+              </Link>
             </span>
             <div className="field__input-wrap">
               <input

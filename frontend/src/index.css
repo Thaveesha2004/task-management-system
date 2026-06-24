@@ -1095,6 +1095,45 @@ h3,
   display: inline-flex;
 }
 
+.auth-link {
+  color: var(--primary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.auth-link:hover {
+  color: var(--primary-hover, #e07a3a);
+  text-decoration: underline;
+}
+
+.auth-link--inline {
+  font-size: 0.82rem;
+}
+
+.auth-form-footer {
+  text-align: center;
+  margin: 4px 0 0;
+}
+
+.forgot-password-success {
+  display: grid;
+  gap: 16px;
+}
+
+.forgot-password-steps {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.forgot-password-steps li + li {
+  margin-top: 8px;
+}
+
 /* ─── Form fields ─── */
 
 label {
