@@ -4,7 +4,7 @@ import { api } from '../api';
 import { useAuth } from '../context/AuthContext';
 import AuthBackground from '../components/AuthBackground';
 import ThemeToggle from '../components/ThemeToggle';
-import { EyeIcon, EyeOffIcon, MailIcon } from '../components/Icons';
+import { EyeIcon, EyeOffIcon, MailIcon, InfoIcon } from '../components/Icons';
 
 export default function Login() {
   const { login } = useAuth();
@@ -50,9 +50,11 @@ export default function Login() {
       <div className="auth-card auth-card--centered auth-card--glass">
         <div className="auth-card__brand">
           <span className="auth-logo" aria-hidden="true">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="9" stroke="white" strokeWidth="2" />
-              <path d="M8 12l2.5 2.5L16 9" stroke="white" strokeWidth="2" strokeLinecap="round" />
+            <svg width="24" height="24" viewBox="0 0 40 40" fill="none">
+              <path
+                d="M30 28V12C30 10.8954 29.1046 10 28 10H27.8994C27.369 10 26.8604 10.2109 26.4854 10.5859L10.5859 26.4854C10.2109 26.8604 10 27.369 10 27.8994V40H0V27.8994C2.15312e-05 24.7168 1.26423 21.6645 3.51465 19.4141L19.4141 3.51465C21.6645 1.26423 24.7168 2.1373e-05 27.8994 0H28C34.6274 0 40 5.37258 40 12V28C40 34.6274 34.6274 40 28 40H14V30H28C29.1046 30 30 29.1046 30 28ZM0 0H17L7 10H0V0Z"
+                fill="currentColor"
+              />
             </svg>
           </span>
           <h1>Taskora</h1>
@@ -120,15 +122,9 @@ export default function Login() {
         </form>
 
         <p className="auth-footer-note">
-          <span aria-hidden="true">ⓘ</span> Access is managed by your administrator
+          <span aria-hidden="true" className="auth-footer-note__icon"><InfoIcon size={14} /></span> Access is managed by your administrator
         </p>
       </div>
-
-      <footer className="auth-page-footer">
-        <span>Privacy Policy</span>
-        <span>Terms of Service</span>
-        <span>Help Center</span>
-      </footer>
     </div>
   );
 }

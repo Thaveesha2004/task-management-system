@@ -5,8 +5,8 @@ import { useAuth } from '../context/AuthContext';
 
 const THEMES = [
   { id: 'blue', label: 'Ocean', className: 'gradient-blue' },
-  { id: 'teal', label: 'Mint', className: 'gradient-teal' },
-  { id: 'purple', label: 'Violet', className: 'gradient-purple' },
+  { id: 'teal', label: 'Teal', className: 'gradient-teal' },
+  { id: 'purple', label: 'Sunset', className: 'gradient-purple' },
 ];
 
 const emptyForm = {
