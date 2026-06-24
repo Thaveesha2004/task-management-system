@@ -7,13 +7,20 @@ export default function PasswordField({
   onChange,
   placeholder = '',
   autoComplete,
+  name,
   required = false,
   disabled = false,
   error = '',
   id,
+  preventAutofill = false,
 }) {
   const [visible, setVisible] = useState(false);
+  const [readOnly, setReadOnly] = useState(preventAutofill);
   const fieldId = id || label.toLowerCase().replace(/\s+/g, '-');
+
+  const handleFocus = () => {
+    if (preventAutofill) setReadOnly(false);
+  };
 
   return (
     <label className="field password-field" htmlFor={fieldId}>
@@ -21,16 +28,21 @@ export default function PasswordField({
       <div className={`field__input-wrap${error ? ' field__input-wrap--error' : ''}`}>
         <input
           id={fieldId}
+          name={name}
           type={visible ? 'text' : 'password'}
           className="input-field"
           value={value}
           onChange={onChange}
+          onFocus={handleFocus}
           placeholder={placeholder}
-          autoComplete={autoComplete}
+          autoComplete={preventAutofill ? 'off' : autoComplete}
+          readOnly={readOnly}
           required={required}
           disabled={disabled}
           aria-invalid={Boolean(error)}
           aria-describedby={error ? `${fieldId}-error` : undefined}
+          data-1p-ignore={preventAutofill ? 'true' : undefined}
+          data-lpignore={preventAutofill ? 'true' : undefined}
         />
         <button
           type="button"
