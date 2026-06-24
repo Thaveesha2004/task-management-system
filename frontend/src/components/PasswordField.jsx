@@ -17,7 +17,7 @@ export default function PasswordField({
   const inputRef = useRef(null);
   const [visible, setVisible] = useState(false);
   const [readOnly, setReadOnly] = useState(preventAutofill);
-  const fieldId = id || label.toLowerCase().replace(/\s+/g, '-');
+  const fieldId = id || (typeof label === 'string' ? label.toLowerCase().replace(/\s+/g, '-') : 'password-field');
 
   const useMaskedText = preventAutofill && !visible;
   const inputType = useMaskedText || visible ? 'text' : 'password';
@@ -30,7 +30,7 @@ export default function PasswordField({
 
   return (
     <label className="field password-field" htmlFor={fieldId}>
-      <span>{label}</span>
+      {typeof label === 'string' ? <span>{label}</span> : label}
       <div className={`field__input-wrap${error ? ' field__input-wrap--error' : ''}`}>
         <input
           ref={inputRef}

@@ -1,13 +1,9 @@
+import { clearStoredAuth, getValidStoredAuth } from './utils/authStorage';
+
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000/api';
 
 function getStoredAuth() {
-  const raw = localStorage.getItem('tms_auth');
-  if (!raw) return null;
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return null;
-  }
+  return getValidStoredAuth();
 }
 
 function buildHeaders() {
@@ -25,8 +21,11 @@ async function handleResponse(response) {
   const data = await response.json().catch(() => ({}));
 
   if (response.status === 401) {
-    localStorage.removeItem('tms_auth');
-    if (!window.location.pathname.includes('/login')) {
+    clearStoredAuth();
+    const onAuthPage =
+      window.location.pathname.includes('/login') ||
+      window.location.pathname.includes('/forgot-password');
+    if (!onAuthPage) {
       window.location.href = '/login';
     }
   }
@@ -289,4 +288,4 @@ export const api = {
   },
 };
 
-export { getStoredAuth, API_BASE };
+export { getStoredAuth, clearStoredAuth, API_BASE };
