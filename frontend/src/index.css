@@ -2462,6 +2462,11 @@ textarea:focus,
   color: var(--text-muted);
 }
 
+.data-table__role-col {
+  min-width: 9.5rem;
+  white-space: nowrap;
+}
+
 .data-table__date {
   white-space: nowrap;
   color: var(--text-muted);
@@ -3000,10 +3005,15 @@ tr:last-child td {
 }
 
 .role-badge {
-  padding: 4px 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 12px;
   border-radius: 999px;
   font-size: 0.78rem;
   font-weight: 600;
+  line-height: 1.25;
+  white-space: nowrap;
 }
 
 .role-badge--admin {

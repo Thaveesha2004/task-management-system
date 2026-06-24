@@ -252,7 +252,7 @@ export default function AdminUsers() {
                 <tr>
                   <th>Member</th>
                   <th>Email</th>
-                  <th>Role</th>
+                  <th className="data-table__role-col">Role</th>
                   <th>Status</th>
                   <th className="data-table__actions-col">Actions</th>
                 </tr>
@@ -274,7 +274,7 @@ export default function AdminUsers() {
                         </span>
                       </td>
                       <td className="data-table__email">{user.email}</td>
-                      <td>
+                      <td className="data-table__role-col">
                         <span className={`role-badge ${roleBadgeClass(user.role)}`}>
                           {user.role}
                         </span>
