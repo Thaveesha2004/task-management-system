@@ -333,7 +333,7 @@ flowchart TB
     GH -->|"deploy image"| BE
     GH -->|"apply migrations"| PG
 
-    B -. "mirror: Vercel / Netlify" .-> FE
+    B -. "mirror: Vercel" .-> FE
 ```
 
 **Production configuration**
@@ -342,4 +342,4 @@ flowchart TB
 - **CORS** — backend `CLIENT_ORIGIN` allow-lists the production domains (`render.yaml`).
 - **Secrets via env** — `DATABASE_URL`, `RESEND_API_KEY`, JWT secret set in the Render dashboard, never committed.
 - **Cold start** — Render free tier idles; the first request after inactivity takes ~30–60 s (warm the URL before demoing).
-- **Mirrors** — `frontend/vercel.json` and `netlify.toml` provide equivalent rewrites for the Vercel/Netlify deployments.
+- **Mirrors** — `frontend/vercel.json` provides equivalent rewrites for the Vercel deployment.
