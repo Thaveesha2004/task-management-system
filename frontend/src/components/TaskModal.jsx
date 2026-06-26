@@ -194,6 +194,9 @@ export default function TaskModal({
 
   const dueToday = new Date();
   dueToday.setHours(0, 0, 0, 0);
+  const pad = (n) => String(n).padStart(2, '0');
+  // Local YYYY-MM-DD so the date picker greys out / disallows past dates.
+  const minDueDate = `${dueToday.getFullYear()}-${pad(dueToday.getMonth() + 1)}-${pad(dueToday.getDate())}`;
   const dueDateError =
     !readOnly && form.due_date && new Date(form.due_date) < dueToday
       ? 'Due date cannot be in the past'
@@ -284,6 +287,7 @@ export default function TaskModal({
                 value={form.due_date}
                 onChange={(e) => updateField('due_date', e.target.value)}
                 disabled={readOnly}
+                min={minDueDate}
                 aria-invalid={Boolean(dueDateError)}
                 aria-describedby={dueDateError ? 'task-duedate-error' : undefined}
               />

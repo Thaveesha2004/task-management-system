@@ -322,10 +322,6 @@ h3,
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: var(--peach-soft);
   color: var(--brand);
   flex-shrink: 0;
 }
@@ -485,7 +481,7 @@ h3,
 .topbar__brand strong {
   font-family: var(--font-headline);
   font-size: 1rem;
-  color: var(--primary);
+  color: var(--text);
 }
 
 .topbar__brand .muted {
@@ -985,12 +981,7 @@ h3,
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
-  background: var(--peach-soft);
   color: var(--brand);
-  box-shadow: 0 4px 14px var(--primary-glow);
 }
 
 .auth-card__hero {
@@ -1418,26 +1409,21 @@ textarea:focus,
   transform: translateY(-1px);
 }
 
+/* Flat icons (no tinted box) — the solid glyphs read fine on their own. */
 .stat-card__icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
-  display: grid;
-  place-items: center;
-  font-size: 1.15rem;
-  background: var(--surface-soft);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   color: var(--text-muted);
 }
 
+.stat-card--primary .stat-card__icon { color: var(--primary); }
+.stat-card--blue .stat-card__icon { color: var(--status-prog); }
+.stat-card--amber .stat-card__icon { color: var(--med); }
+.stat-card--green .stat-card__icon { color: var(--done); }
+.stat-card--todo .stat-card__icon { color: var(--text-muted); }
 .stat-card--indigo .stat-card__icon,
-.stat-card--blue .stat-card__icon,
-.stat-card--slate .stat-card__icon { background: var(--surface-soft); }
-.stat-card--amber .stat-card__icon { background: var(--med-bg); color: var(--med); }
-.stat-card--green .stat-card__icon { background: var(--done-bg); color: var(--done); }
-.stat-card--todo .stat-card__icon {
-  background: color-mix(in srgb, var(--text-muted) 12%, var(--surface-soft));
-  color: var(--text-muted);
-}
+.stat-card--slate .stat-card__icon { color: var(--text-muted); }
 
 .stat-card--featured {
   position: relative;
@@ -1461,10 +1447,6 @@ textarea:focus,
 }
 
 .stat-card__icon--featured {
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
-  background: color-mix(in srgb, var(--primary) 18%, var(--surface-soft));
   color: var(--primary);
 }
 
@@ -1651,6 +1633,9 @@ textarea:focus,
 }
 
 .select-pill {
+  /* override the global `select { width: 100% }` so pills size to content and sit
+     inline (otherwise flex-wrap stacks each full-width select on its own row) */
+  width: auto;
   min-width: 130px;
   padding: 8px 12px;
   font-size: 0.85rem;
@@ -1678,6 +1663,24 @@ textarea:focus,
 
 .data-table__sortable:hover {
   color: var(--text);
+}
+
+/* Horizontal filter controls above the Kanban board */
+.task-filters {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.task-filters .select-pill {
+  flex: 0 0 auto;
+  min-width: 144px;
+}
+
+.task-filters__clear {
+  margin-left: auto;
 }
 
 .search-input {
@@ -2049,6 +2052,208 @@ textarea:focus,
 
 .bento-card--chart {
   grid-row: span 2;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Team Workload (managers only) spans the full row below the chart/upcoming/health */
+.bento-card--workload {
+  grid-column: 1 / -1;
+}
+
+/* ── Calendar widget ───────────────────────────────────────────────────────── */
+.bento-card--calendar {
+  grid-row: span 2;
+  display: flex;
+  flex-direction: column;
+}
+
+.cal-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cal-nav button {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  transition: var(--transition);
+}
+
+.cal-nav button:hover {
+  border-color: var(--border-hover);
+  color: var(--primary);
+}
+
+.cal-nav__label {
+  font-size: 0.84rem;
+  font-weight: 600;
+  min-width: 120px;
+  text-align: center;
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.cal-grid--head {
+  margin-bottom: 6px;
+}
+
+.cal-grid--days {
+  flex: 1;
+  grid-auto-rows: 1fr;
+}
+
+.cal-weekday {
+  text-align: center;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.cal-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-height: 46px;
+  padding: 5px 7px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface-muted);
+  cursor: pointer;
+  overflow: hidden;
+  font: inherit;
+  text-align: left;
+  transition: var(--transition);
+}
+
+.cal-cell:hover {
+  border-color: var(--border-hover);
+}
+
+.cal-cell--out {
+  opacity: 0.38;
+}
+
+.cal-cell--today {
+  border-color: var(--primary);
+}
+
+.cal-cell--today .cal-cell__num {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.cal-cell--sel {
+  background: var(--primary-light);
+  border-color: var(--primary);
+}
+
+.cal-cell__num {
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+.cal-cell__dots {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex-wrap: wrap;
+}
+
+.cal-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  flex: 0 0 auto;
+}
+
+.cal-dot--high { background: var(--danger); }
+.cal-dot--medium { background: var(--warning); }
+.cal-dot--low { background: var(--success); }
+
+.cal-cell__more {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+}
+
+.cal-detail {
+  margin-top: 12px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+
+.cal-detail__title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+
+.cal-detail__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-height: 132px;
+  overflow-y: auto;
+}
+
+.cal-detail__item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: 8px;
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  transition: var(--transition);
+}
+
+.cal-detail__item:hover {
+  border-color: var(--border-hover);
+  transform: translateX(2px);
+}
+
+.cal-detail__name {
+  flex: 1;
+  font-size: 0.82rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cal-detail__project {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  background: var(--surface-soft);
+  padding: 1px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.cal-detail__empty {
+  padding: 4px 0;
 }
 
 .bento-card__header {
@@ -2069,7 +2274,8 @@ textarea:focus,
   align-items: flex-end;
   justify-content: space-between;
   gap: 8px;
-  min-height: 180px;
+  flex: 1;
+  min-height: 200px;
   padding-top: 8px;
 }
 
@@ -2078,12 +2284,19 @@ textarea:focus,
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  height: 180px;
+  gap: 6px;
+  height: 100%;
   justify-content: flex-end;
 }
 
-.bar-chart__col span {
+.bar-chart__value {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  line-height: 1;
+}
+
+.bar-chart__label {
   font-size: 0.72rem;
   color: var(--text-muted);
 }
@@ -2186,16 +2399,49 @@ textarea:focus,
   transform: translateX(2px);
 }
 
+.upcoming-item__main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
 .upcoming-item strong {
   display: block;
   font-size: 0.88rem;
-  margin-bottom: 2px;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.upcoming-item time {
-  font-size: 0.78rem;
+.upcoming-item__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.upcoming-item__project {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  background: var(--surface-soft);
+  padding: 1px 8px;
+  border-radius: 999px;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.upcoming-item time,
+.upcoming-item__due {
+  font-size: 0.76rem;
   color: var(--text-muted);
 }
+
+.upcoming-item__due--overdue { color: var(--danger); font-weight: 600; }
+.upcoming-item__due--soon { color: var(--warning); font-weight: 600; }
 
 .upcoming-list__empty {
   padding: 12px;

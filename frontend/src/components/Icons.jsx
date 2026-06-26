@@ -29,12 +29,12 @@ export function BellIcon({ size = 18 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <path
-        d="M15 17H9l-1-2H6a4 4 0 0 1 4-4V9a3 3 0 1 1 6 0v2a4 4 0 0 1 4 4h-2l-1 2Z"
+        d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9Z"
         stroke="currentColor"
         strokeWidth="1.75"
         strokeLinejoin="round"
       />
-      <path d="M10 20a2 2 0 0 0 4 0" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+      <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
     </svg>
   );
 }
@@ -199,6 +199,67 @@ export function InfoIcon({ size = 16 }) {
       <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.75" />
       <path d="M12 11.5v5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
       <path d="M12 8h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+/* ── Solid (filled) variants for stat tiles — bolder, more relatable ────────── */
+
+export function FolderSolidIcon({ size = 20 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M2.25 7.125C2.25 6.09 3.09 5.25 4.125 5.25h3.879a1.5 1.5 0 0 1 1.06.44l1.122 1.12c.14.141.331.22.53.22H19.5A2.25 2.25 0 0 1 21.75 9.28V9.5H2.25V7.125Z" />
+      <path d="M2.25 11h19.5v6.625a2.25 2.25 0 0 1-2.25 2.25H4.5a2.25 2.25 0 0 1-2.25-2.25V11Z" />
+    </svg>
+  );
+}
+
+export function CheckCircleSolidIcon({ size = 20 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z"
+      />
+    </svg>
+  );
+}
+
+export function ActiveSolidIcon({ size = 20 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z"
+      />
+    </svg>
+  );
+}
+
+export function ChecklistSolidIcon({ size = 20 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <rect x="3" y="5" width="4" height="4" rx="1.3" />
+      <rect x="9" y="5.6" width="12" height="2.8" rx="1.4" />
+      <rect x="3" y="10.5" width="4" height="4" rx="1.3" />
+      <rect x="9" y="11.1" width="12" height="2.8" rx="1.4" />
+      <rect x="3" y="16" width="4" height="4" rx="1.3" />
+      <rect x="9" y="16.6" width="12" height="2.8" rx="1.4" />
+    </svg>
+  );
+}
+
+export function ClipboardSolidIcon({ size = 20 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <rect x="9" y="3" width="6" height="3.6" rx="1.6" />
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M7.5 5H16.5A2.5 2.5 0 0 1 19 7.5V18.5A2.5 2.5 0 0 1 16.5 21H7.5A2.5 2.5 0 0 1 5 18.5V7.5A2.5 2.5 0 0 1 7.5 5ZM8.5 9.5A1 1 0 0 0 8.5 11.5H15.5A1 1 0 0 0 15.5 9.5H8.5ZM8.5 13.5A1 1 0 0 0 8.5 15.5H13A1 1 0 0 0 13 13.5H8.5Z"
+      />
     </svg>
   );
 }

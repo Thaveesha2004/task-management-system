@@ -12,35 +12,40 @@ const STATUS_CLASS = {
   Completed: 'status-done',
 };
 
+const STATUSES = ['To Do', 'In Progress', 'Completed'];
+
 export default function TaskTableView({
   tasks,
   onOpenTask,
   onStatusChange,
   canManageTasks,
   showProject = false,
-  sortBy = null,
-  sortOrder = 'asc',
-  onSort = null,
+  filters = null,
 }) {
-  // FE-4: clickable column headers wired to the server sort params.
-  const sortable = typeof onSort === 'function';
+  // Sort + per-column filters are driven by the shared useTaskFilters state.
+  const sortable = Boolean(filters && typeof filters.setSort === 'function');
+  const sortBy = filters?.sortBy ?? null;
+  const sortOrder = filters?.sortOrder ?? 'asc';
+
   const indicator = (field) => (sortBy === field ? (sortOrder === 'asc' ? ' ▲' : ' ▼') : '');
   const headerProps = (field) =>
     sortable
       ? {
           className: 'data-table__sortable',
-          onClick: () => onSort(field),
+          onClick: () => filters.setSort(field),
           role: 'button',
           tabIndex: 0,
           onKeyDown: (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
-              onSort(field);
+              filters.setSort(field);
             }
           },
           'aria-sort': sortBy === field ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none',
         }
       : {};
+
+  const colSpan = showProject ? 6 : 5;
 
   return (
     <div className="table-wrap task-table panel panel--flush">
@@ -58,7 +63,7 @@ export default function TaskTableView({
         <tbody>
           {tasks.length === 0 ? (
             <tr>
-              <td colSpan={showProject ? 6 : 5} className="data-table__empty muted">
+              <td colSpan={colSpan} className="data-table__empty muted">
                 No tasks match your filters
               </td>
             </tr>
@@ -93,9 +98,8 @@ export default function TaskTableView({
                       className={`table-select status-pill ${STATUS_CLASS[task.status] || ''}`}
                       value={task.status}
                       onChange={(e) => onStatusChange(task, e.target.value)}
-                      disabled={!canManageTasks && false}
                     >
-                      {['To Do', 'In Progress', 'Completed'].map((status) => (
+                      {STATUSES.map((status) => (
                         <option key={status} value={status}>
                           {status}
                         </option>

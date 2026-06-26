@@ -1,4 +1,4 @@
-export default function ProjectHealthCard({ tasks }) {
+export default function ProjectHealthCard({ tasks, subtitle = 'Across your workspace' }) {
   const total = tasks.length || 1;
   const completed = tasks.filter((t) => t.status === 'Completed').length;
   const inProgress = tasks.filter((t) => t.status === 'In Progress').length;
@@ -6,17 +6,16 @@ export default function ProjectHealthCard({ tasks }) {
 
   const completedPct = Math.round((completed / total) * 100);
   const progressPct = Math.round((inProgress / total) * 100);
-  const todoPct = 100 - completedPct - progressPct;
-
-  const optimal = Math.round(((completed + inProgress * 0.5) / total) * 100);
+  const todoPct = Math.max(0, 100 - completedPct - progressPct);
 
   return (
     <section className="bento-card bento-card--health">
       <header className="bento-card__header">
         <div>
-          <h3>Project Health</h3>
-          <p className="muted">Status breakdown</p>
+          <h3>Task Status</h3>
+          <p className="muted">{subtitle}</p>
         </div>
+        <span className="muted">{tasks.length} tasks</span>
       </header>
       <div className="donut-wrap">
         <div
@@ -28,16 +27,18 @@ export default function ProjectHealthCard({ tasks }) {
               var(--warning) ${completedPct + progressPct}% 100%
             )`,
           }}
+          role="img"
+          aria-label={`${completedPct}% of tasks completed`}
         >
           <div className="donut__center">
-            <strong>{optimal}%</strong>
-            <span>Optimal</span>
+            <strong>{completedPct}%</strong>
+            <span>Complete</span>
           </div>
         </div>
         <ul className="donut-legend">
-          <li><span className="dot dot--green" /> On track ({completedPct}%)</li>
-          <li><span className="dot dot--blue" /> In progress ({progressPct}%)</li>
-          <li><span className="dot dot--amber" /> Backlog ({todoPct}%)</li>
+          <li><span className="dot dot--green" /> Completed <b>{completed}</b></li>
+          <li><span className="dot dot--blue" /> In Progress <b>{inProgress}</b></li>
+          <li><span className="dot dot--amber" /> To Do <b>{todo}</b></li>
         </ul>
       </div>
     </section>

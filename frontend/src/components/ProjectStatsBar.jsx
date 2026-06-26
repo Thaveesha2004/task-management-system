@@ -1,7 +1,7 @@
 import AnimatedNumber from './AnimatedNumber';
 import StatCard from './StatCard';
 import CompletionGauge from './CompletionGauge';
-import { ClipboardIcon, ListTodoIcon, TargetIcon, CheckIcon } from './Icons';
+import { ClipboardSolidIcon, ChecklistSolidIcon, ActiveSolidIcon, CheckCircleSolidIcon } from './Icons';
 
 export default function ProjectStatsBar({ stats, completionRate }) {
   return (
@@ -9,7 +9,7 @@ export default function ProjectStatsBar({ stats, completionRate }) {
       <div className="project-stats__total stat-card stat-card--featured">
         <div className="project-stats__total-inner">
           <div className="stat-card__icon stat-card__icon--featured" aria-hidden="true">
-            <ClipboardIcon size={24} />
+            <ClipboardSolidIcon size={44} />
           </div>
           <div>
             <p className="stat-card__label project-stats__total-label">Total Tasks</p>
@@ -26,19 +26,19 @@ export default function ProjectStatsBar({ stats, completionRate }) {
           label="To Do"
           value={stats.todo}
           accent="todo"
-          icon={<ListTodoIcon size={20} />}
+          icon={<ChecklistSolidIcon size={40} />}
         />
         <StatCard
           label="In Progress"
           value={stats.inProgress}
           accent="blue"
-          icon={<TargetIcon size={20} />}
+          icon={<ActiveSolidIcon size={40} />}
         />
         <StatCard
           label="Completed"
           value={stats.done}
           accent="green"
-          icon={<CheckIcon size={20} />}
+          icon={<CheckCircleSolidIcon size={40} />}
         />
         <CompletionGauge percent={completionRate} label="Progress" />
       </div>

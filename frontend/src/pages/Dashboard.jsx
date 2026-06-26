@@ -1,18 +1,19 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { api } from '../api';
-import { useAuth } from '../context/AuthContext';
+import { useAuth, useRole } from '../context/AuthContext';
 import StatCard from '../components/StatCard';
-import ProductivityChart from '../components/ProductivityChart';
+import CalendarCard from '../components/CalendarCard';
 import ProjectHealthCard from '../components/ProjectHealthCard';
 import UpcomingTasks from '../components/UpcomingTasks';
 import TeamWorkload from '../components/TeamWorkload';
 import RecentProjects from '../components/RecentProjects';
 import TaskModal from '../components/TaskModal';
-import { FolderIcon, TargetIcon, CheckIcon, ClipboardIcon } from '../components/Icons';
+import { FolderSolidIcon, ActiveSolidIcon, CheckCircleSolidIcon, ClipboardSolidIcon } from '../components/Icons';
 
 export default function Dashboard() {
   const { mustResetPassword, user } = useAuth();
+  const { canManageTasks } = useRole();
   const [tasks, setTasks] = useState([]);
   const [projects, setProjects] = useState([]);
   const [users, setUsers] = useState([]);
@@ -58,6 +59,12 @@ export default function Dashboard() {
     done: tasks.filter((t) => t.status === 'Completed').length,
   }), [tasks]);
 
+  const projectMap = useMemo(() => {
+    const map = {};
+    projects.forEach((p) => { map[p.id] = p.project_name || p.name; });
+    return map;
+  }, [projects]);
+
   const greeting = useMemo(() => {
     const hour = new Date().getHours();
     if (hour < 12) return 'Good morning';
@@ -89,19 +96,28 @@ export default function Dashboard() {
       {!loading && !error && (
         <>
           <div className="stats-row">
-            <StatCard label="Projects" value={projects.length} accent="indigo" icon={<FolderIcon size={22} />} />
-            <StatCard label="Tasks Completed" value={stats.done} accent="green" icon={<CheckIcon size={22} />} />
-            <StatCard label="Active Tasks" value={stats.inProgress} accent="blue" icon={<TargetIcon size={22} />} />
-            <StatCard label="Total Tasks" value={stats.total} accent="slate" icon={<ClipboardIcon size={22} />} />
+            <StatCard label="Projects" value={projects.length} accent="primary" icon={<FolderSolidIcon size={44} />} />
+            <StatCard label="Tasks Completed" value={stats.done} accent="green" icon={<CheckCircleSolidIcon size={44} />} />
+            <StatCard label="Active Tasks" value={stats.inProgress} accent="blue" icon={<ActiveSolidIcon size={44} />} />
+            <StatCard label="Total Tasks" value={stats.total} accent="amber" icon={<ClipboardSolidIcon size={44} />} />
           </div>
 
           <RecentProjects projects={projects} />
 
           <div className="bento-grid">
-            <ProductivityChart tasks={tasks} />
-            <UpcomingTasks tasks={tasks} onOpenTask={setSelectedTask} />
-            <ProjectHealthCard tasks={tasks} />
-            <TeamWorkload tasks={tasks} users={users} />
+            <CalendarCard
+              tasks={tasks}
+              onOpenTask={setSelectedTask}
+              projectMap={projectMap}
+              title={canManageTasks ? 'Calendar' : 'My Calendar'}
+              subtitle="Tasks by due date"
+            />
+            <UpcomingTasks tasks={tasks} onOpenTask={setSelectedTask} projectMap={projectMap} />
+            <ProjectHealthCard
+              tasks={tasks}
+              subtitle={canManageTasks ? 'Across your workspace' : 'Your assigned tasks'}
+            />
+            {canManageTasks && <TeamWorkload tasks={tasks} users={users} />}
           </div>
         </>
       )}
