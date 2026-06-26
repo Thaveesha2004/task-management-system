@@ -25,7 +25,7 @@ export default function ProjectCard({ project, index = 0 }) {
       <h3>{project.project_name}</h3>
       <p>{project.description?.slice(0, 100) || 'No description yet'}</p>
       <div className="project-card__progress">
-        <div className="project-card__bar" style={{ width: `${Math.max(pct, taskCount ? 8 : 0)}%` }} />
+        <div className="project-card__bar" style={{ width: `${pct}%` }} />
       </div>
       <footer className="project-card__footer">
         <span>{pct}% complete</span>

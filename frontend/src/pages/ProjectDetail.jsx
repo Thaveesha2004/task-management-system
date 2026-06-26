@@ -4,8 +4,10 @@ import { api } from '../api';
 import { useAuth, useRole } from '../context/AuthContext';
 import KanbanBoard from '../components/KanbanBoard';
 import TaskTableView from '../components/TaskTableView';
+import TaskFilterBar from '../components/TaskFilterBar';
 import TaskModal from '../components/TaskModal';
 import ProjectStatsBar from '../components/ProjectStatsBar';
+import { useTaskFilters } from '../hooks/useTaskFilters';
 import { ClipboardIcon } from '../components/Icons';
 
 export default function ProjectDetail() {
@@ -20,25 +22,11 @@ export default function ProjectDetail() {
   const [error, setError] = useState('');
   const [selectedTask, setSelectedTask] = useState(null);
   const [creating, setCreating] = useState(false);
-  const [search, setSearch] = useState('');
-  // FE-4: filter + sort state. Filters apply client-side (so the board keeps all
-  // statuses); sort is sent to the server via the params getTasks already accepts.
-  const [statusFilter, setStatusFilter] = useState('');
-  const [priorityFilter, setPriorityFilter] = useState('');
-  const [assigneeFilter, setAssigneeFilter] = useState('');
-  const [sortBy, setSortBy] = useState('created_at');
-  const [sortOrder, setSortOrder] = useState('desc');
+
+  const filters = useTaskFilters(tasks);
+  const displayedTasks = filters.filtered;
 
   const viewMode = searchParams.get('view') || 'board';
-
-  const handleSort = (field) => {
-    if (sortBy === field) {
-      setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'));
-    } else {
-      setSortBy(field);
-      setSortOrder('asc');
-    }
-  };
 
   const setViewMode = (mode) => {
     const next = new URLSearchParams(searchParams);
@@ -52,7 +40,7 @@ export default function ProjectDetail() {
     try {
       const [projectRes, tasksRes] = await Promise.all([
         api.getProject(projectId),
-        api.getTasks({ project_id: projectId, sortBy, sortOrder }),
+        api.getTasks({ project_id: projectId }),
       ]);
       setProject(projectRes.data);
       setTasks(tasksRes.data || []);
@@ -61,7 +49,7 @@ export default function ProjectDetail() {
     } finally {
       if (!silent) setLoading(false);
     }
-  }, [projectId, sortBy, sortOrder]);
+  }, [projectId]);
 
   useEffect(() => {
     loadData();
@@ -129,35 +117,6 @@ export default function ProjectDetail() {
     }
   };
 
-  const assigneeOptions = useMemo(() => {
-    const map = new Map();
-    tasks.forEach((t) => {
-      (Array.isArray(t.assignees) ? t.assignees : []).forEach((a) => {
-        if (a && a.id != null && !map.has(a.id)) map.set(a.id, a.full_name || a.email || `User ${a.id}`);
-      });
-    });
-    return [...map.entries()].map(([id, name]) => ({ id, name }));
-  }, [tasks]);
-
-  const displayedTasks = useMemo(() => {
-    const term = search.trim().toLowerCase();
-    return tasks.filter((t) => {
-      if (term && !(
-        t.title?.toLowerCase().includes(term) ||
-        t.description?.toLowerCase().includes(term)
-      )) return false;
-      if (statusFilter && t.status !== statusFilter) return false;
-      if (priorityFilter && t.priority !== priorityFilter) return false;
-      if (
-        assigneeFilter &&
-        !(Array.isArray(t.assignees) && t.assignees.some((a) => String(a.id) === String(assigneeFilter)))
-      ) return false;
-      return true;
-    });
-  }, [tasks, search, statusFilter, priorityFilter, assigneeFilter]);
-
-  const hasActiveFilters = Boolean(search || statusFilter || priorityFilter || assigneeFilter);
-
   const stats = useMemo(() => ({
     total: tasks.length,
     todo: tasks.filter((t) => t.status === 'To Do').length,
@@ -192,8 +151,8 @@ export default function ProjectDetail() {
           <input
             className="search-input search-input--header"
             placeholder="Search tasks in this project…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={filters.search}
+            onChange={(e) => filters.setSearch(e.target.value)}
           />
           {canManageTasks && (
             <button type="button" className="btn btn--primary" onClick={() => setCreating(true)}>
@@ -225,60 +184,7 @@ export default function ProjectDetail() {
           </button>
         </div>
 
-        {/* FE-4: status / priority / assignee filters + sort */}
-        <div className="filter-bar__selects">
-          <select className="select-pill" aria-label="Filter by status" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-            <option value="">All statuses</option>
-            <option value="To Do">To Do</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Completed">Completed</option>
-          </select>
-          <select className="select-pill" aria-label="Filter by priority" value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)}>
-            <option value="">All priorities</option>
-            <option value="Low">Low</option>
-            <option value="Medium">Medium</option>
-            <option value="High">High</option>
-          </select>
-          <select className="select-pill" aria-label="Filter by assignee" value={assigneeFilter} onChange={(e) => setAssigneeFilter(e.target.value)}>
-            <option value="">All assignees</option>
-            {assigneeOptions.map((a) => (
-              <option key={a.id} value={a.id}>{a.name}</option>
-            ))}
-          </select>
-          <select
-            className="select-pill"
-            aria-label="Sort by"
-            value={`${sortBy}:${sortOrder}`}
-            onChange={(e) => {
-              const [field, order] = e.target.value.split(':');
-              setSortBy(field);
-              setSortOrder(order);
-            }}
-          >
-            <option value="created_at:desc">Newest first</option>
-            <option value="created_at:asc">Oldest first</option>
-            <option value="due_date:asc">Due date ↑</option>
-            <option value="due_date:desc">Due date ↓</option>
-            <option value="priority:desc">Priority ↓</option>
-            <option value="priority:asc">Priority ↑</option>
-            <option value="title:asc">Title A–Z</option>
-            <option value="title:desc">Title Z–A</option>
-          </select>
-          {hasActiveFilters && (
-            <button
-              type="button"
-              className="btn btn--ghost btn--small"
-              onClick={() => {
-                setSearch('');
-                setStatusFilter('');
-                setPriorityFilter('');
-                setAssigneeFilter('');
-              }}
-            >
-              Clear filters
-            </button>
-          )}
-        </div>
+        <TaskFilterBar filters={filters} />
       </div>
 
       {error && <div className="alert alert--error">{error}</div>}
@@ -293,21 +199,12 @@ export default function ProjectDetail() {
           ))}
         </div>
       ) : displayedTasks.length === 0 && !error ? (
-        hasActiveFilters ? (
+        filters.activeCount > 0 ? (
           <div className="empty-state">
             <span className="empty-state__icon" aria-hidden="true"><ClipboardIcon size={40} /></span>
             <h3>No tasks match your filters</h3>
             <p className="muted">Try clearing the search or filters.</p>
-            <button
-              type="button"
-              className="btn btn--ghost"
-              onClick={() => {
-                setSearch('');
-                setStatusFilter('');
-                setPriorityFilter('');
-                setAssigneeFilter('');
-              }}
-            >
+            <button type="button" className="btn btn--ghost" onClick={filters.clear}>
               Clear filters
             </button>
           </div>
@@ -336,9 +233,7 @@ export default function ProjectDetail() {
           onOpenTask={setSelectedTask}
           onStatusChange={handleStatusChange}
           canManageTasks={canManageTasks}
-          sortBy={sortBy}
-          sortOrder={sortOrder}
-          onSort={handleSort}
+          filters={filters}
         />
       )}
 
