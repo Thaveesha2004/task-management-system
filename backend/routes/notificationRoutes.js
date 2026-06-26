@@ -29,6 +29,18 @@ router.get('/', verifyToken, blockIfMustResetPassword, notificationController.ge
  */
 router.get('/unread-count', verifyToken, blockIfMustResetPassword, notificationController.getUnreadCount);
 
+/**
+ * @swagger
+ * /api/notifications/read-all:
+ *   patch:
+ *     summary: Mark all of the current user's notifications as read
+ *     tags: [Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: All notifications marked read
+ */
 router.patch('/read-all', verifyToken, blockIfMustResetPassword, notificationController.markAllAsRead);
 
 /**
