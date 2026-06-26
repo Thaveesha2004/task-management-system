@@ -171,6 +171,7 @@ const ProjectController = {
       if (err.code === '23503') {
         return errorResponse(res, 409, 'DELETE_BLOCKED', 'Project could not be deleted because of linked records');
       }
+      console.error('deleteProject failed:', err.message);
       return errorResponse(res, 500, 'PROJECT_DELETE_ERROR', 'Failed to delete project', err.message);
     }
   },

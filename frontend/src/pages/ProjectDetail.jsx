@@ -24,6 +24,7 @@ export default function ProjectDetail() {
   const [error, setError] = useState('');
   const [selectedTask, setSelectedTask] = useState(null);
   const [creating, setCreating] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const filters = useTaskFilters(tasks);
   const displayedTasks = filters.filtered;
@@ -144,11 +145,18 @@ export default function ProjectDetail() {
 
     try {
       setError('');
+      setDeleting(true);
       await api.deleteProject(project.id);
       window.dispatchEvent(new Event('tms:tasks-changed'));
       navigate('/projects', { replace: true });
     } catch (err) {
-      setError(err.message || 'Failed to delete project.');
+      const hint =
+        err.status === 404
+          ? ' Delete is not available on this server yet — restart the backend (port 5000) or redeploy Render.'
+          : '';
+      setError((err.message || 'Failed to delete project.') + hint);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -188,8 +196,9 @@ export default function ProjectDetail() {
               type="button"
               className="btn btn--ghost btn--danger-text"
               onClick={handleDeleteProject}
+              disabled={deleting}
             >
-              Delete Project
+              {deleting ? 'Deleting…' : 'Delete Project'}
             </button>
           )}
         </div>
