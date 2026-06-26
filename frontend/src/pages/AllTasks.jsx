@@ -145,15 +145,7 @@ export default function AllTasks() {
           </button>
         </div>
 
-        {viewMode === 'board' ? (
-          <TaskFilterBar filters={filters} projects={projects} />
-        ) : (
-          filters.activeCount > 0 && (
-            <button type="button" className="btn btn--ghost btn--small task-filters__clear" onClick={filters.clear}>
-              Clear ({filters.activeCount})
-            </button>
-          )
-        )}
+        <TaskFilterBar filters={filters} projects={projects} />
       </div>
 
       {loading ? (
@@ -198,7 +190,6 @@ export default function AllTasks() {
           canManageTasks={canManageTasks}
           showProject
           filters={filters}
-          projects={projects}
         />
       )}
 

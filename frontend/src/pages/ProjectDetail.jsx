@@ -184,15 +184,7 @@ export default function ProjectDetail() {
           </button>
         </div>
 
-        {viewMode === 'board' ? (
-          <TaskFilterBar filters={filters} />
-        ) : (
-          filters.activeCount > 0 && (
-            <button type="button" className="btn btn--ghost btn--small task-filters__clear" onClick={filters.clear}>
-              Clear ({filters.activeCount})
-            </button>
-          )
-        )}
+        <TaskFilterBar filters={filters} />
       </div>
 
       {error && <div className="alert alert--error">{error}</div>}

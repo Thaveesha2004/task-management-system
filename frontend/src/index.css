@@ -1701,21 +1701,6 @@ textarea:focus,
   margin-left: auto;
 }
 
-/* Per-column filter row inside the task table header */
-.data-table__filter-row th {
-  position: static;
-  background: var(--surface);
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--border);
-}
-
-.select-pill--table {
-  width: 100%;
-  min-width: 0;
-  padding: 6px 10px;
-  font-size: 0.8rem;
-}
-
 .search-input {
   min-width: 220px;
   padding: 9px 14px;
