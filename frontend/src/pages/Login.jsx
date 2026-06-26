@@ -48,9 +48,11 @@ export default function Login() {
       }
     } catch (err) {
       const message =
-        err.message === 'Invalid email or password'
-          ? 'Invalid email or password. If you used Forgot password recently, sign in with the temporary password from your email.'
-          : err.message;
+        err.code === 'DATABASE_UNAVAILABLE' || err.status === 503
+          ? 'Backend database is offline. Restart the backend (port 5000) and wait for "PostgreSQL connected" in the terminal.'
+          : err.message === 'Invalid email or password'
+            ? 'Invalid email or password. If you used Forgot password recently, sign in with the temporary password from your email.'
+            : err.message;
       setError(message);
       setFieldErrors(fieldErrorMap(err)); // FE-5
     } finally {

@@ -2983,7 +2983,7 @@ textarea:focus,
 }
 
 .data-table__actions-col {
-  width: 180px;
+  width: 240px;
   text-align: right;
 }
 
@@ -3434,8 +3434,23 @@ tr:last-child td {
 
 .table-actions {
   display: flex;
+  align-items: center;
+  justify-content: flex-end;
   gap: 6px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+}
+
+.table-actions__delete {
+  margin-left: 6px;
+  padding: 5px 7px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--surface-muted) 70%, transparent);
+}
+
+.table-actions__delete:hover {
+  background: var(--danger-light);
+  border-color: color-mix(in srgb, var(--danger) 35%, var(--border));
 }
 
 .table-footer {
@@ -3761,6 +3776,20 @@ tr:last-child td {
 .icon-btn:hover {
   background: var(--surface-muted);
   color: var(--text);
+}
+
+.icon-btn--small {
+  font-size: 1rem;
+  padding: 4px 6px;
+}
+
+.icon-btn--danger {
+  color: var(--danger);
+}
+
+.icon-btn--danger:hover {
+  background: var(--danger-light);
+  color: var(--danger);
 }
 
 /* ─── Comments ─── */

@@ -1,5 +1,5 @@
 const dotenv = require('dotenv');
-dotenv.config();
+dotenv.config({ override: true });
 
 // BE-8: fail fast. Without JWT_SECRET, jwt.verify throws on every request and
 // tokens cannot be trusted — refuse to start rather than run in a broken state.
@@ -221,11 +221,22 @@ async function startServer() {
     }
   } catch (error) {
     console.error('Database initialization failed:', error.message);
+    console.error(
+      'Tip: If you see ECONNRESET/timeout, your network may block port 5432. ' +
+        'Use Docker Postgres (USE_LOCAL_DB=true) or run the frontend with: npm run dev:cloud'
+    );
   }
 
   server.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${PORT}`);
     console.log(`Swagger docs available at http://localhost:${PORT}/api-docs`);
+  }).on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`Port ${PORT} is already in use. Stop the other backend first:`);
+      console.error(`  Get-NetTCPConnection -LocalPort ${PORT} | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }`);
+      process.exit(1);
+    }
+    throw err;
   });
 }
 

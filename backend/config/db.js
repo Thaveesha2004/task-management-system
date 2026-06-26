@@ -4,14 +4,14 @@ const dotenv = require('dotenv');
 const { getConnectionCandidates } = require('./dbConfig');
 
 dns.setDefaultResultOrder('ipv4first');
-dotenv.config();
+dotenv.config({ override: true });
 
 let pool = null;
 let activeConfigLabel = null;
 let connecting = null;
 
 const STALE_CONNECTION =
-  /connection is in closed state|Connection terminated|ECONNRESET|ENOTFOUND|ETIMEDOUT|connection timeout/i;
+  /connection is in closed state|Connection terminated|ECONNRESET|ENOTFOUND|ETIMEDOUT|connection timeout|All database connection attempts failed/i;
 
 function attachPoolErrorHandler(activePool) {
   activePool.on('error', (err) => {
@@ -37,11 +37,12 @@ async function connectWithFallback() {
         user: candidate.user,
         password: candidate.password,
         database: candidate.database,
-        ssl: candidate.ssl ?? { rejectUnauthorized: false },
+        ...(candidate.ssl ? { ssl: candidate.ssl } : {}),
         max: 10,
         idleTimeoutMillis: 30_000,
-        connectionTimeoutMillis: 10_000,
+        connectionTimeoutMillis: 30_000,
         keepAlive: true,
+        family: 4,
       };
       const testPool = new Pool(config);
 
@@ -78,14 +79,14 @@ async function getPool() {
   return pool;
 }
 
-async function runQuery(pgSql, params = []) {
+function buildQueryConfig(sql, params = []) {
   const values = Array.isArray(params) ? params : [];
-    // Supabase pooler (Supavisor) can reject prepared statements on some modes.
-    // Use simple query mode for parameterized SQL so login and other API queries work.
-  const queryConfig =
-    values.length > 0
-      ? { text: pgSql, values, queryMode: 'simple' }
-      : pgSql;
+  const pgSql = toPgSql(sql);
+  return values.length > 0 ? { text: pgSql, values, queryMode: 'simple' } : pgSql;
+}
+
+async function runQuery(pgSql, params = []) {
+  const queryConfig = typeof pgSql === 'string' ? buildQueryConfig(pgSql, params) : pgSql;
 
   try {
     const activePool = await getPool();
@@ -98,6 +99,24 @@ async function runQuery(pgSql, params = []) {
       return activePool.query(queryConfig);
     }
     throw err;
+  }
+}
+
+async function runTransaction(callback) {
+  const activePool = await getPool();
+  const client = await activePool.connect();
+  const txQuery = (sql, params = []) => client.query(buildQueryConfig(sql, params));
+
+  try {
+    await client.query('BEGIN');
+    const result = await callback(txQuery);
+    await client.query('COMMIT');
+    return result;
+  } catch (err) {
+    await client.query('ROLLBACK').catch(() => {});
+    throw err;
+  } finally {
+    client.release();
   }
 }
 
@@ -144,6 +163,7 @@ const db = {
     query: (sql, params = []) =>
       runQuery(toPgSql(sql), params).then((result) => [result.rows, result.fields]),
   }),
+  runTransaction,
   connectWithFallback,
   getActiveConfigLabel: () => activeConfigLabel,
 };

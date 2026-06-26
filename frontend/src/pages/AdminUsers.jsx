@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { api } from '../api';
-import { useRole } from '../context/AuthContext';
+import { TrashIcon } from '../components/Icons';
+import { useAuth, useRole } from '../context/AuthContext';
 import { scrollToElement } from '../utils/scrollToElement';
 import { fieldErrorMap } from '../utils/formErrors';
 
@@ -33,6 +34,7 @@ function roleBadgeClass(role) {
 }
 
 export default function AdminUsers() {
+  const { user: currentUser } = useAuth();
   const { canViewAdmin } = useRole();
   const [users, setUsers] = useState([]);
   const [form, setForm] = useState({ name: '', email: '', role: 'Collaborator' });
@@ -78,8 +80,14 @@ export default function AdminUsers() {
     }
   }, [error, message]);
 
+  const managedUsers = useMemo(() => {
+    const currentId = Number(currentUser?.id);
+    if (!currentId) return users;
+    return users.filter((user) => Number(user.id) !== currentId);
+  }, [users, currentUser?.id]);
+
   const filteredUsers = useMemo(() => {
-    let list = users;
+    let list = managedUsers;
     const term = search.trim().toLowerCase();
     if (term) {
       list = list.filter(
@@ -96,7 +104,7 @@ export default function AdminUsers() {
       list = list.filter((u) => u.role === 'Collaborator');
     }
     return list;
-  }, [users, search, roleFilter]);
+  }, [managedUsers, search, roleFilter]);
 
   if (!canViewAdmin) {
     return <Navigate to="/" replace />;
@@ -156,6 +164,34 @@ export default function AdminUsers() {
       await loadUsers();
     } catch (err) {
       setError(err.message);
+    }
+  };
+
+  const handleDelete = async (id, name) => {
+    const normalizedId = Number(id);
+
+    if (
+      !window.confirm(
+        `Permanently delete ${name}? This removes their account from the system and cannot be undone.`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      setError('');
+      setMessage('');
+      const result = await api.deleteUser(normalizedId);
+      setUsers((prev) => prev.filter((user) => Number(user.id) !== normalizedId));
+      setMessage(result.message || 'User deleted permanently.');
+      if (Number(editId) === normalizedId) resetForm();
+      await loadUsers();
+    } catch (err) {
+      const hint =
+        err.status === 404
+          ? ' Delete route not found — restart the local backend (port 5000) and Vite dev server.'
+          : '';
+      setError((err.message || 'Failed to delete user.') + hint);
     }
   };
 
@@ -348,6 +384,15 @@ export default function AdminUsers() {
                               Activate
                             </button>
                           )}
+                          <button
+                            type="button"
+                            className="icon-btn icon-btn--danger icon-btn--small table-actions__delete"
+                            onClick={() => handleDelete(user.id, user.name)}
+                            aria-label={`Delete ${user.name}`}
+                            title="Delete user permanently"
+                          >
+                            <TrashIcon size={14} />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -356,7 +401,7 @@ export default function AdminUsers() {
               </tbody>
             </table>
             <div className="table-footer muted">
-              Showing {filteredUsers.length} of {users.length} members
+              Showing {filteredUsers.length} of {managedUsers.length} members
             </div>
           </div>
         )}

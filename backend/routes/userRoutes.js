@@ -100,6 +100,17 @@ router.put('/:id', verifyToken, blockIfMustResetPassword, requireRole('Admin'), 
 
 /**
  * @swagger
+ * /api/users/{id}:
+ *   delete:
+ *     summary: Permanently delete a user (Admin)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ */
+router.delete('/:id', verifyToken, blockIfMustResetPassword, requireRole('Admin'), userController.deleteUser);
+
+/**
+ * @swagger
  * /api/users/{id}/deactivate:
  *   patch:
  *     summary: Deactivate a user (Admin)

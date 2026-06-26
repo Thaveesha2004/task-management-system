@@ -8,6 +8,9 @@ const { sendForgotPasswordEmail, isEmailConfigured } = require('../utils/sendEma
 const FORGOT_PASSWORD_SUCCESS_MESSAGE =
   'If an account matches that email or name, a temporary password has been sent. Check your inbox and sign in to set a new password.';
 
+const DB_UNAVAILABLE =
+  /connection is in closed state|Connection terminated|ECONNRESET|ENOTFOUND|ETIMEDOUT|connection timeout|All database connection attempts failed/i;
+
 exports.login = async (req, res) => {
   try {
     const email = String(req.body.email || '').trim().toLowerCase();
@@ -68,6 +71,13 @@ exports.login = async (req, res) => {
       },
     });
   } catch (err) {
+    if (DB_UNAVAILABLE.test(err.message)) {
+      return res.status(503).json({
+        errorCode: 'DATABASE_UNAVAILABLE',
+        message:
+          'Cannot reach the database. Ensure the backend is running and connected (check terminal for "PostgreSQL connected").',
+      });
+    }
     return internalError(res, err, 'Login failed');
   }
 };

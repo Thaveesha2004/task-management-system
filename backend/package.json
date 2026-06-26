@@ -6,6 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
+    "dev:clean": "node scripts/free-port.js 5000",
+    "predev": "node scripts/free-port.js 5000",
     "postinstall": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "prisma db seed",

@@ -3,8 +3,7 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
-  const apiTarget =
-    env.VITE_DEV_PROXY_TARGET || 'https://task-management-system-backend-z9y4.onrender.com';
+  const apiTarget = env.VITE_DEV_PROXY_TARGET || 'http://localhost:5000';
 
   return {
     plugins: [react()],

@@ -133,7 +133,12 @@ exports.getUsers = async (req, res) => {
        JOIN roles r ON u.role_id = r.id
        ORDER BY u.id`
     );
-    res.json({ success: true, data: results });
+    const data = results.map((user) => ({
+      ...user,
+      name: user.full_name,
+      role: user.role_name,
+    }));
+    res.json({ success: true, data });
   } catch (err) {
     return internalError(res, err);
   }
@@ -230,6 +235,89 @@ exports.activateUser = async (req, res) => {
     res.json({ message: 'User activated successfully' });
   } catch (err) {
     return internalError(res, err);
+  }
+};
+
+exports.deleteUser = async (req, res) => {
+  try {
+    const targetId = Number(req.params.id);
+    const adminId = Number(req.user.id);
+
+    if (!targetId || Number.isNaN(targetId)) {
+      return validationError(res, [{ field: 'id', message: 'A valid user id is required' }]);
+    }
+
+    if (targetId === adminId) {
+      return res.status(400).json({
+        errorCode: 'CANNOT_DELETE_SELF',
+        message: 'You cannot delete your own account',
+      });
+    }
+
+    const deletedRows = await db.runTransaction(async (query) => {
+      const exists = await query(
+        `SELECT u.id, r.role_name
+         FROM users u
+         JOIN roles r ON u.role_id = r.id
+         WHERE u.id = ?`,
+        [targetId]
+      );
+
+      if (!exists.rows.length) {
+        return null;
+      }
+
+      if (exists.rows[0].role_name === 'Admin') {
+        const adminCount = await query(
+          `SELECT COUNT(*)::int AS count
+           FROM users u
+           JOIN roles r ON u.role_id = r.id
+           WHERE r.role_name = 'Admin'`
+        );
+
+        if (Number(adminCount.rows[0]?.count ?? 0) <= 1) {
+          const err = new Error('Cannot delete the only admin account');
+          err.code = 'LAST_ADMIN';
+          throw err;
+        }
+      }
+
+      await query('DELETE FROM comments WHERE user_id = ?', [targetId]);
+      await query('DELETE FROM attachments WHERE uploaded_by = ?', [targetId]);
+      await query('DELETE FROM notifications WHERE user_id = ?', [targetId]);
+      await query(
+        'UPDATE projects SET created_by = ?, updated_at = CURRENT_TIMESTAMP WHERE created_by = ?',
+        [adminId, targetId]
+      );
+      await query(
+        'UPDATE tasks SET created_by = ?, updated_at = CURRENT_TIMESTAMP WHERE created_by = ?',
+        [adminId, targetId]
+      );
+
+      const deleted = await query('DELETE FROM users WHERE id = ? RETURNING id', [targetId]);
+      return deleted.rows;
+    });
+
+    if (!deletedRows?.length) {
+      return res.status(404).json({ errorCode: 'NOT_FOUND', message: 'User not found' });
+    }
+
+    res.json({ message: 'User deleted permanently', deletedId: deletedRows[0].id });
+  } catch (err) {
+    if (err.code === 'LAST_ADMIN') {
+      return res.status(400).json({
+        errorCode: 'LAST_ADMIN',
+        message: err.message,
+      });
+    }
+    if (err.code === '23503') {
+      return res.status(409).json({
+        errorCode: 'DELETE_BLOCKED',
+        message: 'User could not be deleted because of linked records',
+      });
+    }
+    console.error('deleteUser failed:', err.message);
+    return internalError(res, err, 'Failed to delete user');
   }
 };
 

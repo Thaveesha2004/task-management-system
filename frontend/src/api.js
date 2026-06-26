@@ -178,6 +178,7 @@ export const api = {
   getUsers() {
     return fetch(`${API_BASE}/users`, {
       headers: buildHeaders(),
+      cache: 'no-store',
     }).then(handleResponse);
   },
 
@@ -201,6 +202,14 @@ export const api = {
     return fetch(`${API_BASE}/users/${id}/deactivate`, {
       method: 'PATCH',
       headers: buildHeaders(),
+    }).then(handleResponse);
+  },
+
+  deleteUser(id) {
+    return fetch(`${API_BASE}/users/${id}`, {
+      method: 'DELETE',
+      headers: buildHeaders(),
+      cache: 'no-store',
     }).then(handleResponse);
   },
 
