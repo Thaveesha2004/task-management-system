@@ -5,8 +5,8 @@ export default function AppTopBar({ connected }) {
   return (
     <header className="topbar">
       <div className="topbar__brand">
-        <strong>Taskora</strong>
-        <span className="muted">Velocity workspace</span>
+        <strong>Velocity workspace</strong>
+        <span className="muted">Task management</span>
       </div>
       <div className="topbar__actions">
         <ThemeToggle />
