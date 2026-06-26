@@ -1,6 +1,13 @@
 const dotenv = require('dotenv');
 dotenv.config();
 
+// BE-8: fail fast. Without JWT_SECRET, jwt.verify throws on every request and
+// tokens cannot be trusted — refuse to start rather than run in a broken state.
+if (!process.env.JWT_SECRET) {
+  console.error('FATAL: JWT_SECRET is not set. Set it in the environment before starting the server.');
+  process.exit(1);
+}
+
 const express = require('express');
 const cors = require('cors');
 const http = require('http');
@@ -10,6 +17,7 @@ const db = require('./config/db');
 const { hasDatabaseConfig } = require('./config/dbConfig');
 const socketService = require('./services/socketService');
 const { notifyUsers } = require('./services/notificationService');
+const { globalLimiter } = require('./middleware/rateLimiters');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const taskRoutes = require('./routes/taskRoutes');
@@ -27,6 +35,10 @@ const allowedOrigins = (process.env.CLIENT_ORIGIN || 'http://localhost:5173')
 const app = express();
 const server = http.createServer(app);
 
+// Trust the first proxy hop (Render/most PaaS) so express-rate-limit keys on the
+// real client IP from X-Forwarded-For rather than the proxy's address.
+app.set('trust proxy', 1);
+
 socketService.init(server);
 
 app.use(
@@ -41,6 +53,9 @@ app.use(
   })
 );
 app.use(express.json());
+
+// BE-2: global rate limit on all routes (login gets a stricter limiter in authRoutes).
+app.use(globalLimiter);
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
@@ -182,10 +197,6 @@ async function connectDatabaseWithRetry(attempts = 5) {
 }
 
 async function startServer() {
-  if (!process.env.JWT_SECRET) {
-    console.warn('Warning: JWT_SECRET is not set');
-  }
-
   try {
     if (hasDatabaseConfig()) {
       await connectDatabaseWithRetry();
