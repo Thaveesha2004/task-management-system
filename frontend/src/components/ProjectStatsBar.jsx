@@ -9,7 +9,7 @@ export default function ProjectStatsBar({ stats, completionRate }) {
       <div className="project-stats__total stat-card stat-card--featured">
         <div className="project-stats__total-inner">
           <div className="stat-card__icon stat-card__icon--featured" aria-hidden="true">
-            <ClipboardSolidIcon size={26} />
+            <ClipboardSolidIcon size={34} />
           </div>
           <div>
             <p className="stat-card__label project-stats__total-label">Total Tasks</p>
@@ -26,19 +26,19 @@ export default function ProjectStatsBar({ stats, completionRate }) {
           label="To Do"
           value={stats.todo}
           accent="todo"
-          icon={<ChecklistSolidIcon size={22} />}
+          icon={<ChecklistSolidIcon size={30} />}
         />
         <StatCard
           label="In Progress"
           value={stats.inProgress}
           accent="blue"
-          icon={<ActiveSolidIcon size={22} />}
+          icon={<ActiveSolidIcon size={30} />}
         />
         <StatCard
           label="Completed"
           value={stats.done}
           accent="green"
-          icon={<CheckCircleSolidIcon size={22} />}
+          icon={<CheckCircleSolidIcon size={30} />}
         />
         <CompletionGauge percent={completionRate} label="Progress" />
       </div>

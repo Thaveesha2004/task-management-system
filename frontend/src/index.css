@@ -322,10 +322,6 @@ h3,
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: var(--peach-soft);
   color: var(--brand);
   flex-shrink: 0;
 }
@@ -485,7 +481,7 @@ h3,
 .topbar__brand strong {
   font-family: var(--font-headline);
   font-size: 1rem;
-  color: var(--primary);
+  color: var(--text);
 }
 
 .topbar__brand .muted {
@@ -985,12 +981,7 @@ h3,
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
-  background: var(--peach-soft);
   color: var(--brand);
-  box-shadow: 0 4px 14px var(--primary-glow);
 }
 
 .auth-card__hero {
@@ -1418,31 +1409,21 @@ textarea:focus,
   transform: translateY(-1px);
 }
 
+/* Flat icons (no tinted box) — the solid glyphs read fine on their own. */
 .stat-card__icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
-  display: grid;
-  place-items: center;
-  font-size: 1.15rem;
-  background: var(--surface-soft);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   color: var(--text-muted);
 }
 
-.stat-card--primary .stat-card__icon { background: var(--primary-light); color: var(--primary); }
-.stat-card--blue .stat-card__icon {
-  background: color-mix(in srgb, var(--status-prog) 16%, var(--surface-soft));
-  color: var(--status-prog);
-}
-/* legacy neutral accents (kept for safety) */
+.stat-card--primary .stat-card__icon { color: var(--primary); }
+.stat-card--blue .stat-card__icon { color: var(--status-prog); }
+.stat-card--amber .stat-card__icon { color: var(--med); }
+.stat-card--green .stat-card__icon { color: var(--done); }
+.stat-card--todo .stat-card__icon { color: var(--text-muted); }
 .stat-card--indigo .stat-card__icon,
-.stat-card--slate .stat-card__icon { background: var(--surface-soft); }
-.stat-card--amber .stat-card__icon { background: var(--med-bg); color: var(--med); }
-.stat-card--green .stat-card__icon { background: var(--done-bg); color: var(--done); }
-.stat-card--todo .stat-card__icon {
-  background: color-mix(in srgb, var(--text-muted) 12%, var(--surface-soft));
-  color: var(--text-muted);
-}
+.stat-card--slate .stat-card__icon { color: var(--text-muted); }
 
 .stat-card--featured {
   position: relative;
@@ -1466,10 +1447,6 @@ textarea:focus,
 }
 
 .stat-card__icon--featured {
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
-  background: color-mix(in srgb, var(--primary) 18%, var(--surface-soft));
   color: var(--primary);
 }
 

@@ -29,12 +29,12 @@ export function BellIcon({ size = 18 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <path
-        d="M15 17H9l-1-2H6a4 4 0 0 1 4-4V9a3 3 0 1 1 6 0v2a4 4 0 0 1 4 4h-2l-1 2Z"
+        d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9Z"
         stroke="currentColor"
         strokeWidth="1.75"
         strokeLinejoin="round"
       />
-      <path d="M10 20a2 2 0 0 0 4 0" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+      <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
     </svg>
   );
 }
