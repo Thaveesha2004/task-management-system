@@ -58,7 +58,9 @@ exports.createUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(tempPassword, 10);
 
     const [rows] = await db.promise().query(
-      'INSERT INTO users (full_name, email, password_hash, role_id, is_first_login) VALUES (?, ?, ?, ?, TRUE) RETURNING id',
+      `INSERT INTO users (full_name, email, password_hash, role_id, is_first_login, created_at, updated_at)
+       VALUES (?, ?, ?, ?, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+       RETURNING id`,
       [full_name, email, hashedPassword, roleId]
     );
 
