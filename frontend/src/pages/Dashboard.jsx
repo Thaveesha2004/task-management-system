@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { api } from '../api';
 import { useAuth, useRole } from '../context/AuthContext';
 import StatCard from '../components/StatCard';
-import ProductivityChart from '../components/ProductivityChart';
+import CalendarCard from '../components/CalendarCard';
 import ProjectHealthCard from '../components/ProjectHealthCard';
 import UpcomingTasks from '../components/UpcomingTasks';
 import TeamWorkload from '../components/TeamWorkload';
@@ -105,10 +105,12 @@ export default function Dashboard() {
           <RecentProjects projects={projects} />
 
           <div className="bento-grid">
-            <ProductivityChart
+            <CalendarCard
               tasks={tasks}
-              title={canManageTasks ? 'Team Productivity' : 'My Activity'}
-              subtitle={canManageTasks ? 'Tasks created by day' : 'Your task activity by day'}
+              onOpenTask={setSelectedTask}
+              projectMap={projectMap}
+              title={canManageTasks ? 'Calendar' : 'My Calendar'}
+              subtitle="Tasks by due date"
             />
             <UpcomingTasks tasks={tasks} onOpenTask={setSelectedTask} projectMap={projectMap} />
             <ProjectHealthCard

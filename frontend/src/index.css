@@ -2084,6 +2084,201 @@ textarea:focus,
   grid-column: 1 / -1;
 }
 
+/* ── Calendar widget ───────────────────────────────────────────────────────── */
+.bento-card--calendar {
+  grid-row: span 2;
+  display: flex;
+  flex-direction: column;
+}
+
+.cal-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cal-nav button {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  transition: var(--transition);
+}
+
+.cal-nav button:hover {
+  border-color: var(--border-hover);
+  color: var(--primary);
+}
+
+.cal-nav__label {
+  font-size: 0.84rem;
+  font-weight: 600;
+  min-width: 120px;
+  text-align: center;
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.cal-grid--head {
+  margin-bottom: 6px;
+}
+
+.cal-grid--days {
+  flex: 1;
+  grid-auto-rows: 1fr;
+}
+
+.cal-weekday {
+  text-align: center;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.cal-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-height: 46px;
+  padding: 5px 7px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface-muted);
+  cursor: pointer;
+  overflow: hidden;
+  font: inherit;
+  text-align: left;
+  transition: var(--transition);
+}
+
+.cal-cell:hover {
+  border-color: var(--border-hover);
+}
+
+.cal-cell--out {
+  opacity: 0.38;
+}
+
+.cal-cell--today {
+  border-color: var(--primary);
+}
+
+.cal-cell--today .cal-cell__num {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.cal-cell--sel {
+  background: var(--primary-light);
+  border-color: var(--primary);
+}
+
+.cal-cell__num {
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+.cal-cell__dots {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex-wrap: wrap;
+}
+
+.cal-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  flex: 0 0 auto;
+}
+
+.cal-dot--high { background: var(--danger); }
+.cal-dot--medium { background: var(--warning); }
+.cal-dot--low { background: var(--success); }
+
+.cal-cell__more {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+}
+
+.cal-detail {
+  margin-top: 12px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+
+.cal-detail__title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+
+.cal-detail__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-height: 132px;
+  overflow-y: auto;
+}
+
+.cal-detail__item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: 8px;
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  transition: var(--transition);
+}
+
+.cal-detail__item:hover {
+  border-color: var(--border-hover);
+  transform: translateX(2px);
+}
+
+.cal-detail__name {
+  flex: 1;
+  font-size: 0.82rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cal-detail__project {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  background: var(--surface-soft);
+  padding: 1px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.cal-detail__empty {
+  padding: 4px 0;
+}
+
 .bento-card__header {
   display: flex;
   align-items: flex-start;
