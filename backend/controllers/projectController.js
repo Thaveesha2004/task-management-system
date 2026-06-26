@@ -31,11 +31,12 @@ const ProjectController = {
       }
 
       const isCollaborator = req.user.role === 'Collaborator';
+      const isProjectManager = req.user.role === 'Project Manager';
+      const project = results[0];
 
       const respond = () => {
         ProjectModel.getProjectMembers(id, (err2, members) => {
           if (err2) members = [];
-          const project = results[0];
           // BE-42/BE-43: don't expose member emails to Collaborators.
           project.members = isCollaborator
             ? (members || []).map(({ email, ...rest }) => rest)
@@ -43,6 +44,11 @@ const ProjectController = {
           res.status(200).json({ success: true, data: project });
         });
       };
+
+      // Project Managers may only open projects they created.
+      if (isProjectManager && Number(project.created_by) !== Number(req.user.id)) {
+        return errorResponse(res, 403, 'FORBIDDEN', 'You do not have access to this project');
+      }
 
       // BE-42: a Collaborator may only open a project they created or belong to.
       if (isCollaborator) {

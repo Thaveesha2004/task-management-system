@@ -68,6 +68,7 @@ export function useRole() {
     isProjectManager: role === 'Project Manager',
     isCollaborator: role === 'Collaborator',
     canManageTasks: role === 'Admin' || role === 'Project Manager',
+    canCreateProjects: role === 'Admin' || role === 'Project Manager',
     canViewAdmin: role === 'Admin',
   };
 }

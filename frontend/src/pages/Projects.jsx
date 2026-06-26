@@ -9,7 +9,7 @@ import { FolderIcon } from '../components/Icons';
 
 export default function Projects() {
   const { mustResetPassword } = useAuth();
-  const { canManageTasks } = useRole();
+  const { canCreateProjects } = useRole();
   const [searchParams, setSearchParams] = useSearchParams();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -35,13 +35,13 @@ export default function Projects() {
   }, [loadProjects]);
 
   useEffect(() => {
-    if (searchParams.get('create') === '1' && canManageTasks) {
+    if (searchParams.get('create') === '1' && canCreateProjects) {
       setCreating(true);
       const next = new URLSearchParams(searchParams);
       next.delete('create');
       setSearchParams(next, { replace: true });
     }
-  }, [searchParams, canManageTasks, setSearchParams]);
+  }, [searchParams, canCreateProjects, setSearchParams]);
 
   const displayed = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -71,7 +71,7 @@ export default function Projects() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          {canManageTasks && (
+          {canCreateProjects && (
             <button type="button" className="btn btn--primary" onClick={() => setCreating(true)}>
               + New Project
             </button>
@@ -91,8 +91,12 @@ export default function Projects() {
         <div className="empty-state">
           <span className="empty-state__icon" aria-hidden="true"><FolderIcon size={40} /></span>
           <h3>No projects yet</h3>
-          <p className="muted">Create a project first, then add tasks inside it.</p>
-          {canManageTasks && (
+          <p className="muted">
+            {canCreateProjects
+              ? 'Create a project first, then add tasks inside it.'
+              : 'You will see projects here when you are added to one.'}
+          </p>
+          {canCreateProjects && (
             <button type="button" className="btn btn--primary" onClick={() => setCreating(true)}>
               + Create Project
             </button>
@@ -106,7 +110,7 @@ export default function Projects() {
         </div>
       )}
 
-      {creating && (
+      {creating && canCreateProjects && (
         <ProjectModal
           onClose={() => setCreating(false)}
           onSaved={() => loadProjects()}

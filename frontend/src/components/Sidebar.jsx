@@ -21,7 +21,7 @@ const NAV = [
 
 export default function Sidebar() {
   const { user, logout } = useAuth();
-  const { canViewAdmin, canManageTasks } = useRole();
+  const { canViewAdmin, canCreateProjects } = useRole();
   const location = useLocation();
 
   return (
@@ -54,7 +54,7 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {canManageTasks && (
+      {canCreateProjects && (
         <div className="sidebar__mid">
           <Link to="/projects?create=1" className="sidebar__cta">
             + New Project

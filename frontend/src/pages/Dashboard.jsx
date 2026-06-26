@@ -15,7 +15,7 @@ import { FolderSolidIcon, ActiveSolidIcon, CheckCircleSolidIcon, ClipboardSolidI
 
 export default function Dashboard() {
   const { mustResetPassword, user } = useAuth();
-  const { canManageTasks } = useRole();
+  const { canManageTasks, canCreateProjects } = useRole();
   const [tasks, setTasks] = useState([]);
   const [projects, setProjects] = useState([]);
   const [users, setUsers] = useState([]);
@@ -88,7 +88,9 @@ export default function Dashboard() {
           <p className="muted">
             {projects.length
               ? `You have ${projects.length} project${projects.length === 1 ? '' : 's'} and ${stats.total} tasks across your workspace.`
-              : 'Create a project, then add tasks inside it.'}
+              : canCreateProjects
+                ? 'Create a project, then add tasks inside it.'
+                : 'You will see your assigned work here once you are added to a project.'}
           </p>
         </div>
       </header>
@@ -104,7 +106,7 @@ export default function Dashboard() {
             <StatCard label="Total Tasks" value={stats.total} accent="amber" icon={<ClipboardSolidIcon size={44} />} />
           </div>
 
-          <RecentProjects projects={projects} />
+          <RecentProjects projects={projects} canCreateProjects={canCreateProjects} />
 
           <div className="bento-grid">
             <CalendarCard

@@ -24,6 +24,12 @@ const TaskModel = {
         )
       )`;
       values.push(filters.userId, filters.userId);
+    } else if (filters.userRole === 'Project Manager') {
+      sql += ` AND EXISTS (
+        SELECT 1 FROM projects p
+        WHERE p.id = tasks.project_id AND p.created_by = ?
+      )`;
+      values.push(filters.userId);
     }
 
     if (filters.status) {

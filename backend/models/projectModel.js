@@ -2,8 +2,8 @@ const db = require('../config/db');
 
 const ProjectModel = {
 
-  // BE-42: Collaborators only see projects they created or are members of.
-  // Admin/PM (no filters or non-Collaborator role) see all projects.
+  // BE-42: Collaborators see projects they created, are members of, or have assigned tasks in.
+  // Project Managers see only projects they created. Admin sees all projects.
   getAllProjects: (filters, callback) => {
     if (typeof filters === 'function') {
       callback = filters;
@@ -34,6 +34,9 @@ const ProjectModel = {
                  )
                )`;
       values.push(filters.userId, filters.userId, filters.userId);
+    } else if (filters.userRole === 'Project Manager') {
+      sql += ` WHERE projects.created_by = ?`;
+      values.push(filters.userId);
     }
 
     sql += ` ORDER BY projects.created_at DESC`;
