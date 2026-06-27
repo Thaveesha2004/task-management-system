@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth, useRole } from '../context/AuthContext';
-import { GridIcon, FolderIcon, UsersIcon, ClipboardIcon, UserIcon } from './Icons';
+import { CloseIcon, GridIcon, FolderIcon, UsersIcon, ClipboardIcon, UserIcon } from './Icons';
 
 function getInitials(name = '') {
   return name
@@ -19,13 +19,25 @@ const NAV = [
   { to: '/admin', label: 'Users', match: (path) => path.startsWith('/admin'), icon: UsersIcon, adminOnly: true },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen = false, onNavigate, onClose }) {
   const { user, logout } = useAuth();
   const { canViewAdmin, canCreateProjects } = useRole();
   const location = useLocation();
 
+  const handleNavigate = () => {
+    onNavigate?.();
+  };
+
+  const handleLogout = () => {
+    handleNavigate();
+    logout();
+  };
+
   return (
-    <aside className="sidebar">
+    <aside
+      id="app-sidebar"
+      className={`sidebar ${isOpen ? 'is-open' : ''}`}
+    >
       <div className="sidebar__brand">
         <span className="sidebar__logo" aria-hidden="true">
           <svg width="28" height="28" viewBox="0 0 40 40" fill="none">
@@ -36,6 +48,14 @@ export default function Sidebar() {
           </svg>
         </span>
         <strong>Taskora</strong>
+        <button
+          type="button"
+          className="sidebar__close-btn"
+          onClick={onClose}
+          aria-label="Close navigation menu"
+        >
+          <CloseIcon size={18} />
+        </button>
       </div>
 
       <nav className="sidebar__nav">
@@ -45,6 +65,7 @@ export default function Sidebar() {
             to={item.to}
             className={`sidebar__link ${item.match(location.pathname) ? 'is-active' : ''}`}
             aria-current={item.match(location.pathname) ? 'page' : undefined}
+            onClick={handleNavigate}
           >
             <span className="sidebar__link-icon" aria-hidden="true">
               <item.icon size={18} />
@@ -56,21 +77,21 @@ export default function Sidebar() {
 
       {canCreateProjects && (
         <div className="sidebar__mid">
-          <Link to="/projects?create=1" className="sidebar__cta">
+          <Link to="/projects?create=1" className="sidebar__cta" onClick={handleNavigate}>
             + New Project
           </Link>
         </div>
       )}
 
       <div className="sidebar__footer">
-        <Link to="/account" className="sidebar__profile">
+        <Link to="/account" className="sidebar__profile" onClick={handleNavigate}>
           <span className="sidebar__avatar">{getInitials(user?.name)}</span>
           <div>
             <strong>{user?.name}</strong>
             <span className="sidebar__role">{user?.role}</span>
           </div>
         </Link>
-        <button type="button" className="sidebar__logout" onClick={logout}>
+        <button type="button" className="sidebar__logout" onClick={handleLogout}>
           Sign out
         </button>
       </div>
